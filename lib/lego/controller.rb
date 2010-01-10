@@ -1,4 +1,3 @@
-
 #
 # = Lego::Controller
 # Lego::Controller is the context where you setup routes and stuff.
@@ -11,8 +10,10 @@ class Lego::Controller
 
   class << self
 
+    #
     # When Lego::Controller is inherited it will create a new Lego::Controller::ActionContext for the class thats inheriting
     # and it will also create a new Lego::Controller::RouteHandler module for the class thats inheriting. 
+    #
 
     def inherited(class_inheriting)
       class_inheriting.const_set(:ActionContext, Class.new(Lego::Controller::ActionContext))
@@ -20,7 +21,7 @@ class Lego::Controller
     end
 
     # 
-    # Use register inside your Extensions to inject your code into the right place.
+    # Use register inside your plugin to inject your code into the right place.
     #
     # Context available are:
     #
@@ -36,6 +37,10 @@ class Lego::Controller
         self::RouteHandler.add_matcher plugin_module 
       end
     end
+
+    # 
+    # add_route is exposed to your plugin as a shortcut for adding routes to the application they are plugged in to.
+    #
 
     def add_route(method, route)
       self::RouteHandler.add_route(method, route)
