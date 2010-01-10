@@ -36,6 +36,10 @@ private
     @response[:body] << instance_eval(&route[:action_block]) if route[:action_block]
   end
 
+  #
+  # setup_defaults creates a default @response object with enough data to satisfies Rack.
+  #
+
   def setup_defaults
     @response = {}
     @response[:headers] = {'Content-Type' => 'text/html'}
