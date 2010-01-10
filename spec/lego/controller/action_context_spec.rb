@@ -40,7 +40,6 @@ describe Lego::Controller::ActionContext do
 
     it 'should convert route[:instance_vars] to instance variables' do
       route = { :instance_vars => { :myvar => "This is my var" } }
-      # @instance.should_receive(:setup_instance_vars_from_route).with(route, @env)
       @instance.run(route, @env).should eql([200, {'Content-Type' => 'text/html'} , '' ])
       @instance.instance_variable_get(:@myvar).should eql("This is my var")
     end
