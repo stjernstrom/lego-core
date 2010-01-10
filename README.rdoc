@@ -1,0 +1,18 @@
+= Lego
+
+
+=== Example controller
+
+This is a sample of a custom Lego controller:
+
+  class MyBlog < Lego::Controller
+
+    plugin BasicRoutes
+
+    get '/' do
+      "Hello, this is /"
+    end
+
+  end
+
+
