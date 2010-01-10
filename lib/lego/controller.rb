@@ -55,7 +55,7 @@ class Lego::Controller
       if route = self::RouteHandler.match_all_routes(env)
         self::ActionContext.new.run
       else
-        [404, {}, '404 - Not found'] 
+        [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
       end
     end
 

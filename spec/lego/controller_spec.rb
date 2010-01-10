@@ -134,7 +134,7 @@ describe Lego::Controller do
 
     after do
       MyApp.call(@env).should eql(
-        [404, {}, '404 - Not found']
+        [404, {'Content-Type' => 'text/html'}, '404 - Not found']
       )
       rm_const "MyApp"
     end
