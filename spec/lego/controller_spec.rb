@@ -48,12 +48,12 @@ describe Lego::Controller do
     end
   end
 
-  context '.register :controller, <plugin_module>' do
+  context '.add_plugin :controller, <plugin_module>' do
     before do
       create_new_app("MyApp", Lego::Controller)
       module MyPlugin2
         def self.register(lego)
-          lego.register :controller, PluginMethods
+          lego.add_plugin :controller, PluginMethods
         end
         module PluginMethods
           def get_this;end
@@ -77,7 +77,7 @@ describe Lego::Controller do
       create_new_app("MyApp", Lego::Controller)
       module MyRouter
         def self.register(lego)
-          lego.register :router, RouterMethods 
+          lego.add_plugin :router, RouterMethods 
         end
         module RouterMethods
           extend self

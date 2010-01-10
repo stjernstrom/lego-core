@@ -28,7 +28,7 @@ class Lego::Controller
     # - :router
     #
 
-    def register(context, plugin_module)
+    def add_plugin(context, plugin_module)
       case context
       when :controller
         extend plugin_module
