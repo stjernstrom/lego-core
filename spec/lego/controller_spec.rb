@@ -72,7 +72,24 @@ describe Lego::Controller do
     end
   end
 
-  context '.register :router, <plugin_module>' do
+  context '.add_route <method> <route>' do
+    before do
+      create_new_app("MyApp", Lego::Controller)
+    end
+
+    it 'should be defined' do
+      MyApp.should respond_to(:add_route)
+    end
+
+    it 'should add a route to RouteHandler' do
+      route = {:path => '/somewhere'}
+      method = :get
+      MyApp::RouteHandler.should_receive(:add_route).with(method, route)
+      MyApp.add_route(method, route)
+    end
+  end
+
+  context '.add_plugin :router, <plugin_module>' do
     before do
       create_new_app("MyApp", Lego::Controller)
       module MyRouter

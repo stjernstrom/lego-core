@@ -37,6 +37,10 @@ class Lego::Controller
       end
     end
 
+    def add_route(method, route)
+      self::RouteHandler.add_route(method, route)
+    end
+
     #
     # Use plugin in your controllers to choose which extensions you want to use in this controller. 
     #
