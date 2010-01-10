@@ -28,6 +28,11 @@ class Lego::Controller
     # - :controller
     # - :router
     #
+    # and on the way
+    #
+    # - :view
+    # - :helper ?
+    #
 
     def add_plugin(context, plugin_module)
       case context
