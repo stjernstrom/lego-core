@@ -111,7 +111,7 @@ describe Lego::Controller do
 
     it 'should create a new instance of ActionContext' do
       mock = mock("ActionContext instance")
-      mock.should_receive(:run)
+      mock.should_receive(:run).with("route", @env)
       MyApp::ActionContext.should_receive(:new).and_return(mock)
     end
 

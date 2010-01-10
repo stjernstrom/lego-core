@@ -53,7 +53,7 @@ class Lego::Controller
 
     def call(env)
       if route = self::RouteHandler.match_all_routes(env)
-        self::ActionContext.new.run
+        self::ActionContext.new.run(route, env)
       else
         [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
       end
