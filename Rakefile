@@ -20,7 +20,8 @@ Spec::Rake::SpecTask.new('rcov') do |t|
   t.spec_opts = ['--options', '"spec/spec.opts"']
   # rcov
   t.rcov = true
-  t.rcov_opts = ['-T', '--exclude', 'spec']
+  t.rcov_dir = 'doc/coverage'
+  t.rcov_opts = ['-p', '-T', '--exclude', 'spec']
 end
 
 desc "Run the specs under spec"
