@@ -3,16 +3,8 @@
 
 === Example controller
 
-This is a sample of a custom Lego controller:
+This is a sample of a custom Lego controller included from examples/config.ru
 
-  class MyBlog < Lego::Controller
-
-    plugin BasicRoutes
-
-    get '/' do
-      "Hello, this is /"
-    end
-
-  end
+  :include:examples/config.ru
 
 
