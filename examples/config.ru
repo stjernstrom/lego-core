@@ -34,15 +34,38 @@ module RegexpMatcher
   end
 end
 
+module SymbolExtractor
+  def self.register(lego)
+    lego.add_plugin :router, self 
+  end
+
+  def self.match_route(route, env) 
+    return false if not route[:path].kind_of?(String)
+    matches = route[:path].scan(/:([\w]+)/) 
+    if matches.size > 0 
+      exp = Regexp.escape( route[:path] ).gsub(/:([\w]+)/, "([\\w]+)") 
+      if match = Regexp.new("^#{exp}$").match(env["PATH_INFO"]) 
+        route[:instance_vars] = {} if route[:instance_vars].nil?  
+        1.upto(matches.size) do |i| 
+           route[:instance_vars][matches[i-1]] = match.captures[i-1] 
+         end 
+        return true   
+      end 
+    end 
+    false 
+  end 
+end
+
 class MyBlog < Lego::Controller
 
   plugin BasicRoutes
   plugin RegexpMatcher
+  plugin SymbolExtractor
 
   #
   # Ex: http://localhost:9393/extract/something.jpg
   #
-  get /extract\/(.*)\.(.*)/ do
+  get /extract\/(\w+)\.(\w+)/ do
     "We are extracting....#{@caps.inspect}" 
   end
 
@@ -52,10 +75,13 @@ class MyBlog < Lego::Controller
   get '/' do
     "This is /"
   end
+
+  get '/show/:id' do
+    "This is show with id = #{@id}"
+  end
 end
 
 run MyBlog
 
 # Save this stuff to config.ru and fire it up with 'rackup'
-
 
