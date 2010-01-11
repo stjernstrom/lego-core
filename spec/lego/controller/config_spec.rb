@@ -12,8 +12,6 @@ describe Lego::Controller::Config do
         Lego::Controller.set :foo => "bar"
       end
 
-
-
       it "should be accessible to Lego::Controller" do
          Lego::Controller.current_config.options(:foo).should eql("bar")
       end
@@ -27,7 +25,8 @@ describe Lego::Controller::Config do
       end
 
       after do
-         rm_const "App1", "App2"
+        clean_config! Lego::Controller
+        rm_const "App1", "App2"
       end
     end
 
@@ -52,15 +51,31 @@ describe Lego::Controller::Config do
       end
 
       after do
+        clean_config! Lego::Controller, App1, App2
         rm_const "App1", "App2"
       end
     end
   end 
 
+  context ".config" do
+    
+    before do
+      Lego::Controller.set :foo => "bar",
+                           :baz => "quux"
+    end
+
+    it "should contain the newly set options" do
+      Lego::Controller.current_config.config.should eql({"foo"=>"bar","baz"=>"quux"})
+    end
+
+    after do
+      clean_config! Lego::Controller
+    end
+  end
+
   context ".options key" do
 
     before do
-      clean_config! Lego::Controller
       Lego::Controller.set :my_symbol  => "my_symbol",
                            "my_string" => "my_string"
     end
@@ -71,6 +86,10 @@ describe Lego::Controller::Config do
 
     it "should allow symbol acces to string keys" do
       Lego::Controller.current_config.options(:my_string).should eql("my_string")
+    end
+
+    after do
+      clean_config! Lego::Controller
     end
   end
 end

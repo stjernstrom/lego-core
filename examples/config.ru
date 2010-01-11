@@ -56,16 +56,6 @@ module SymbolExtractor
   end 
 end
 
-Lego::Controller.environment :development do
-  set :current_env => "development"
-end
-
-Lego::Controller.environment :production do
-  set :current_env => "production"
-end
-
-ENV['RACK_ENV'] = 'production'
-
 class MyBlog < Lego::Controller
   set :foo => "bar"
 
@@ -92,8 +82,7 @@ class MyBlog < Lego::Controller
   end
 
   get '/options' do
-    "foo =>         " + options(:foo) + "<br />" + 
-    "current_env => " + options(:current_env)
+    "foo => " + options(:foo)
   end
 end
 
