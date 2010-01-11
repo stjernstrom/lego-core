@@ -1,18 +1,23 @@
 = Lego
 
+== TODO
 
-=== Example controller
+- Add a new README and let README.rdoc only be used in the rdoc documentation.
+- Add methods for handling ActionContext plugins.
+- Add methods for loading plugins globally.
+- Add a 404 route to be called when route not found (defined in controller) Ex: not_found { 404 - file not found"" }
+- Add before and after filter handling.
 
-This is a sample of a custom Lego controller:
+== Thoughts
 
-  class MyBlog < Lego::Controller
+- Move ActionContext and RouteHandler into different module that controller?
+- Add a plugin Context for before and after filters to make them pluggable?
+- When route is matchen with a different method than the one requested you should not respond 404, support for this?
 
-    plugin BasicRoutes
+== Example controller
 
-    get '/' do
-      "Hello, this is /"
-    end
+This is a sample of a custom Lego controller included from examples/config.ru
 
-  end
+  :include:examples/config.ru
 
 
