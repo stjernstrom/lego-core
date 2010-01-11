@@ -48,7 +48,26 @@ class Lego::Controller
     end
 
     # 
-    # add_route is exposed to your plugin as a shortcut for adding routes to the application they are plugged in to.
+    # add_route <method> <route> is exposed to your plugin as a shortcut for adding routes to the application they are plugged in to.
+    # 
+    # <method> is a symbol for the request method it should match
+    # 
+    # Valid options are:
+    #
+    # - :get
+    # - :post
+    # - :put
+    # - :head
+    # - :options
+    # - :not_found
+    #
+    # <route> is a hash with keys to be handled by the route matchers and also the ActionContext
+    #
+    # Valid options are anything your route matcher can handle. But there's some keys that's special for Lego and they are.
+    #
+    # - :action_block      => A block thats going to be executed inside ActionContext.
+    # - :instance_vars     => A hash where the keys beeing converted to ActionContext vars ex: { :var1 => "value1", :var2 => "value2" } 
+    # - :set_response_code => An integer representing the response code.
     #
 
     def add_route(method, route)
