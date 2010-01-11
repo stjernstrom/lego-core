@@ -56,6 +56,16 @@ module SymbolExtractor
   end 
 end
 
+Lego::Controller.environment :development do
+  set :current_env => "development"
+end
+
+Lego::Controller.environment :production do
+  set :current_env => "production"
+end
+
+ENV['RACK_ENV'] = 'production'
+
 class MyBlog < Lego::Controller
   set :foo => "bar"
 
@@ -82,11 +92,11 @@ class MyBlog < Lego::Controller
   end
 
   get '/options' do
-    "foo => #{options(:foo)}"
+    "foo =>         " + options(:foo) + "<br />" + 
+    "current_env => " + options(:current_env)
   end
 end
 
 run MyBlog
-
 # Save this stuff to config.ru and fire it up with 'rackup'
 
