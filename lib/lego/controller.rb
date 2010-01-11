@@ -39,9 +39,10 @@ class Lego::Controller
     #
 
     def add_plugin(context, plugin_module)
+      base = (self == Lego::Controller) ? Lego::Controller : self 
       case context
       when :controller
-        extend plugin_module
+        base.extend plugin_module
       when :router
         self::RouteHandler.add_matcher plugin_module 
       when :view
