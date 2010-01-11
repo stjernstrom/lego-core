@@ -46,5 +46,24 @@ describe Lego::Controller::ActionContext do
 
   end
 
+  context ".options helper method" do
+    before do
+      create_new_app "App", Lego::Controller
+      Lego::Controller::ActionContext::ApplicationClass = App
+      @instance = Lego::Controller::ActionContext.new
+      @env = []
+    end
+
+    it 'should evaluate :action_block in instance if exists in route' do
+      Lego::Controller.set :foo => "bar"
+      route = { :action_block => Proc.new{ options(:foo) }}
+      @instance.run(route, @env).should eql([200, {'Content-Type' => 'text/html'} , "bar" ])
+    end
+
+    after do
+      rm_const "App"
+    end
+  end
+
 end
 

@@ -19,8 +19,21 @@ describe Lego::Controller do
       MyController::ActionContext.object_id.should_not == Lego::Controller::ActionContext.object_id
     end
 
+    it 'should setup a constant on ActionContext holding a reference to the application class' do
+      MyController::ActionContext::ApplicationClass.should eql(MyController)
+    end
+
     it 'should create a new RouteHandler for the inheriting class' do
       MyController::RouteHandler.object_id.should_not == Lego::Controller::RouteHandler.object_id
+    end
+
+    it 'should create a new Config for the inheriting class' do
+      MyController::Config.object_id.should_not == Lego::Controller::Config.object_id
+    end
+
+    it 'should create a new Config for every inheriting class' do
+      create_new_app "MyOtherController", Lego::Controller
+      MyController::Config.object_id.should_not == MyOtherController::Config.object_id
     end
   end
 
@@ -157,5 +170,76 @@ describe Lego::Controller do
     end
   end
 
+  context ".set" do
+    context 'on Lego::Controller' do
+
+      it "should proxy the method call to its own Config" do
+        Lego::Controller::Config.should_receive(:set).and_return(nil)
+        Lego::Controller.set :foo => "bar"
+      end
+    end
+
+    context "on subclasses" do
+      
+      before do
+        create_new_app "MyApp", Lego::Controller
+      end
+
+      it "should proxy the method call to its own Confg" do
+        MyApp::Config.should_receive(:set).and_return(nil)
+        MyApp.set :foo => "bar"
+      end
+
+      after do
+        rm_const "MyApp"
+      end
+    end
+  end
+
+  context ".environment <env>" do
+    
+    context 'on Lego::Controller' do
+
+      before do
+        @config_block = lambda {}
+      end
+
+      it 'should proxy the method call to its own config' do
+        Lego::Controller::Config.should_receive(:environment).with(nil, &@config_block).and_return(nil)
+        Lego::Controller.environment(&@config_block)
+      end
+
+      it 'take an optional <env> argument' do
+        Lego::Controller::Config.should_receive(:environment).
+                                 with('development', &@config_block).
+                                 and_return(nil)
+
+        Lego::Controller.environment('development', &@config_block)
+      end
+
+      it 'should raise an ArgumentError if no block is provided' do
+        lambda { 
+          Lego::Controller.environment(:development) 
+        }.should raise_error(ArgumentError, "No block provided")
+      end
+    end
+
+    context 'on subclasses' do
+
+      before do
+        create_new_app "MyApp", Lego::Controller
+        @config_block = lambda {}
+      end
+
+      it 'should proxy the method call to its own config' do
+        MyApp::Config.should_receive(:environment).with(nil, &@config_block).and_return(nil)
+        MyApp.environment(&@config_block)
+      end
+
+      after do
+        rm_const "MyApp"
+      end
+    end
+  end
 end
 

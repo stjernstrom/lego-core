@@ -9,6 +9,10 @@ class Lego::Controller::ActionContext
     setup_defaults
   end
 
+  def options(key)
+    "#{self.class::ApplicationClass.current_config.options(key)}"
+  end
+
   def run(route, env)
     setup_instance_vars_from_route(route, env)
     evaluate_action(route)

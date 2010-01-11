@@ -1,4 +1,4 @@
-require 'lego'
+require File.join(File.expand_path(File.dirname(__FILE__)), '..',  'lib', 'lego')
 
 module BasicRoutes
   def self.register(lego)
@@ -56,7 +56,18 @@ module SymbolExtractor
   end 
 end
 
+Lego::Controller.environment :development do
+  set :current_env => "development"
+end
+
+Lego::Controller.environment :production do
+  set :current_env => "production"
+end
+
+ENV['RACK_ENV'] = 'production'
+
 class MyBlog < Lego::Controller
+  set :foo => "bar"
 
   plugin BasicRoutes
   plugin RegexpMatcher
@@ -79,9 +90,13 @@ class MyBlog < Lego::Controller
   get '/show/:id' do
     "This is show with id = #{@id}"
   end
+
+  get '/options' do
+    "foo =>         " + options(:foo) + "<br />" + 
+    "current_env => " + options(:current_env)
+  end
 end
 
 run MyBlog
-
 # Save this stuff to config.ru and fire it up with 'rackup'
 

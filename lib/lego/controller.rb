@@ -7,6 +7,7 @@ class Lego::Controller
 
   autoload :ActionContext, 'lego/controller/action_context'
   autoload :RouteHandler,  'lego/controller/route_handler'
+  autoload :Config,        'lego/controller/config'
 
   class << self
 
@@ -16,8 +17,11 @@ class Lego::Controller
     #
 
     def inherited(class_inheriting)
-      class_inheriting.const_set(:ActionContext, Class.new(Lego::Controller::ActionContext))
-      class_inheriting.const_set(:RouteHandler, Module).extend Lego::Controller::RouteHandler
+      class_inheriting.const_set(:ActionContext, Class.new(Lego::Controller::ActionContext) do
+        const_set :ApplicationClass, class_inheriting
+      end)
+      class_inheriting.const_set(:RouteHandler,  Module).extend Lego::Controller::RouteHandler
+      class_inheriting.const_set(:Config,        Module.new { extend Lego::Controller::Config })
     end
 
     # 
@@ -59,6 +63,46 @@ class Lego::Controller
 
     def plugin(plugin_module)
       plugin_module.register(self)
+    end
+
+    #
+    # Provides acces to the current Config class
+    #
+
+    def current_config
+      self::Config
+    end
+
+    #
+    # Use set to define environment agnostic configuration options
+    #
+    # Usage:
+    #   Lego::Controller.set :foo => "bar"
+    #
+
+    def set(options={})
+      current_config.set(options)
+    end
+
+    #
+    # Use environment to define environment specific configuration options 
+    #
+    # Usage:
+    #   Lego::Controller.environment :development do
+    #     set :foo => "bar"
+    #   end
+    #
+    # or set environment agnostic configuration options by leaving out the environment parameter
+    #
+    # Usage:
+    #   Lego::Controller.environment do
+    #     set :foo => "bar"
+    #   end
+    #
+
+    def environment(env=nil, &block)
+      raise ArgumentError, "No block provided" unless block_given?
+      current_config.environment(env, &block)
     end
 
     #
