@@ -56,6 +56,20 @@ module SymbolExtractor
   end 
 end
 
+module HtmlPlug
+  def self.register(lego)
+    lego.add_plugin :view, Mod
+  end
+  module Mod
+    def h1(content)
+      "<h1>#{content}</h1>"
+    end
+    def b(content)
+      "<b>#{content}</b>"
+    end
+  end
+end
+
 Lego::Controller.environment :development do
   set :current_env => "development"
 end
@@ -72,6 +86,9 @@ class MyBlog < Lego::Controller
   plugin BasicRoutes
   plugin RegexpMatcher
   plugin SymbolExtractor
+
+  # Sample ActionContext plugin giving h1() and b() methods to views.
+  plugin HtmlPlug
 
   #
   # Ex: http://localhost:9393/extract/something.jpg
@@ -95,8 +112,29 @@ class MyBlog < Lego::Controller
     "foo =>         " + options(:foo) + "<br />" + 
     "current_env => " + options(:current_env)
   end
+
+  #
+  # Demonstrating a simple ActionContext plugin (HtmlPlug)
+  # 
+  # Ex: http://localhost:9393/viewplugins
+  #
+  get '/viewplugins' do
+    h1("Hello, i'm a header.") + b("And im some stupid bold text.....")
+  end
+
+  #
+  # This action will be called if no other route matches. 
+  #
+  # Ex: http://localhost:9393/you_will_not_find_me/
+  #
+  not_found do
+    h1("404 - File not found") + "Lego could not find what you are looking for, sorry."
+  end
+
+
 end
 
 run MyBlog
+
 # Save this stuff to config.ru and fire it up with 'rackup'
 
