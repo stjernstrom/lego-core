@@ -10,7 +10,7 @@ class Lego::Controller::ActionContext
   end
 
   def options(key)
-    "#{self.class::CurrentClass.current_config.options(key)}"
+    "#{self.class::ApplicationClass.current_config.options(key)}"
   end
 
   def run(route, env)

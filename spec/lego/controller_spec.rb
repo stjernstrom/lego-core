@@ -19,6 +19,10 @@ describe Lego::Controller do
       MyController::ActionContext.object_id.should_not == Lego::Controller::ActionContext.object_id
     end
 
+    it 'should setup a constant on ActionContext holding a reference to the application class' do
+      MyController::ActionContext::ApplicationClass.should eql(MyController)
+    end
+
     it 'should create a new RouteHandler for the inheriting class' do
       MyController::RouteHandler.object_id.should_not == Lego::Controller::RouteHandler.object_id
     end
