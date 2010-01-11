@@ -9,6 +9,10 @@ class Lego::Controller::ActionContext
     setup_defaults
   end
 
+  def options(key)
+    Lego::Controller.current_config.options(key)
+  end
+
   def run(route, env)
     evaluate_action(route)
     [@response[:code], @response[:headers], @response[:body]]
