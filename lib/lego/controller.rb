@@ -31,10 +31,10 @@ class Lego::Controller
     #
     # - :controller
     # - :router
+    # - :view
     #
     # and on the way
     #
-    # - :view
     # - :helper ?
     #
 
@@ -44,6 +44,10 @@ class Lego::Controller
         extend plugin_module
       when :router
         self::RouteHandler.add_matcher plugin_module 
+      when :view
+        self::ActionContext.instance_eval do
+          include plugin_module
+        end
       end
     end
 

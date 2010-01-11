@@ -65,6 +65,30 @@ describe Lego::Controller do
     end
   end
 
+  context '.add_plugin :view, <plugin_module>' do
+    before do
+      create_new_app("MyApp", Lego::Controller)
+      module MyViewPlugin
+        def self.register(lego)
+          lego.add_plugin :view, self
+        end
+        def makebold(content)
+          "<b>#{content}</b>"
+        end
+      end
+    end
+
+    it 'should make plugin methods availibe to ActionContext' do
+      MyApp::ActionContext.instance_methods.should_not include('makebold')
+      MyApp.plugin MyViewPlugin
+      MyApp::ActionContext.instance_methods.should include('makebold')
+    end
+
+    after do
+      rm_const "MyViewPlugin", "MyApp"
+    end
+  end
+
   context '.add_plugin :controller, <plugin_module>' do
     before do
       create_new_app("MyApp", Lego::Controller)
