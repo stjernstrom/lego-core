@@ -1,4 +1,4 @@
-= Lego
+= Lego-core
 
 == TODO
 
