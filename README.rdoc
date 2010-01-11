@@ -5,7 +5,6 @@
 - Add a new README and let README.rdoc only be used in the rdoc documentation.
 - Add methods for handling ActionContext plugins.
 - Add methods for loading plugins globally.
-- Add a 404 route to be called when route not found (defined in controller) Ex: not_found { 404 - file not found"" }
 - Add before and after filter handling.
 
 == Thoughts
