@@ -3,8 +3,8 @@
 
 class Lego::Controller::ActionContext
 
-  attr_accessor :response
-
+  attr_accessor :response, :env, :route
+  
   def initialize
     setup_defaults
   end
@@ -14,8 +14,10 @@ class Lego::Controller::ActionContext
   end
 
   def run(route, env)
-    setup_instance_vars_from_route(route, env)
-    evaluate_action(route)
+    @route = route
+    @env = env 
+    setup_instance_vars_from_route
+    evaluate_action
     [@response[:code], @response[:headers], @response[:body]]
   end
 
@@ -26,18 +28,19 @@ private
   # and converts them to instance variables which makes them availible to the ActionContext.
   #
 
-  def setup_instance_vars_from_route(route, env)
-    route[:instance_vars].each_key do |var|
-      instance_variable_set("@#{var}", route[:instance_vars][var])
-    end if route[:instance_vars]
+  def setup_instance_vars_from_route
+    @route[:instance_vars].each_key do |var|
+      instance_variable_set("@#{var}", @route[:instance_vars][var])
+    end if @route[:instance_vars]
+    @response[:code] = @route[:set_response_code] if @route[:set_response_code]
   end
 
   #
   # evaluate_action executes route[:action_block] and appends the output to @response[:body]
   #
 
-  def evaluate_action(route)
-    @response[:body] << instance_eval(&route[:action_block]) if route[:action_block]
+  def evaluate_action
+    @response[:body] << instance_eval(&@route[:action_block]) if @route[:action_block]
   end
 
   #
@@ -50,5 +53,4 @@ private
     @response[:code]    = 200
     @response[:body]    = ''
   end
-
 end

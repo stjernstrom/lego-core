@@ -108,15 +108,28 @@ class Lego::Controller
     #
     # call is used to handle an incomming Rack request. 
     #
+    # If no matching route is found we check for a defined :not_found route
+    # and if no :not_found defined we send a simple 404 - not found.
+    #
 
     def call(env)
       if route = self::RouteHandler.match_all_routes(env)
         self::ActionContext.new.run(route, env)
       else
-        [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
+        if route = self::RouteHandler.routes[:not_found]
+          self::ActionContext.new.run(route, env)
+        else
+          [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
+        end
       end
     end
 
   end
+
+  #
+  # Core plugins
+  #
+
+  plugin Lego::Plugin::Controller::NotFound
 
 end

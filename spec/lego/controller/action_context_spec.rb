@@ -44,6 +44,10 @@ describe Lego::Controller::ActionContext do
       @instance.instance_variable_get(:@myvar).should eql("This is my var")
     end
 
+    it 'should set response[:code] if set_response_route is set in route' do
+      route = { :set_response_code => 666 }
+      @instance.run(route, @env).should eql([666, {'Content-Type' => 'text/html'} , '' ])
+    end
   end
 
   context ".options helper method" do

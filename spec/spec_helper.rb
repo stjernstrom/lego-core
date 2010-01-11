@@ -1,10 +1,8 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
-# require 'rubygems'
+
 require 'lib/lego'
 require 'spec'
-# require 'spec/autorun'
-# require 'rack/test'
 
 def create_new_app(class_name, baseclass = Class)
   Object.class_eval do

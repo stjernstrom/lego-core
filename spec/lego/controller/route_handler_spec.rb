@@ -58,11 +58,12 @@ describe Lego::Controller::RouteHandler do
 
     it 'should return empty routes when new' do
       @route_handler.routes.should eql({
-        :get    => [],
-        :post   => [],
-        :put    => [],
-        :head   => [],
-        :delete => []
+        :get       => [],
+        :post      => [],
+        :put       => [],
+        :head      => [],
+        :delete    => [],
+        :not_found => nil
       })
     end
   end
@@ -72,10 +73,18 @@ describe Lego::Controller::RouteHandler do
       @route_handler = empty_route_handler
     end
 
-    it 'should store routes with their options' do
-      route_options = { :path => '/a_path' }
-      @route_handler.add_route(:get, route_options)
-      @route_handler.routes[:get].should eql([route_options])
+    it 'should appen routes with their options' do
+      route_options1 = { :path => '/a_path1' }
+      route_options2 = { :path => '/a_path2' }
+      @route_handler.add_route(:get, route_options1)
+      @route_handler.add_route(:get, route_options2)
+      @route_handler.routes[:get].should eql([route_options1, route_options2])
+    end
+
+    it 'should set not_found route if method is :not_found' do
+      route_options = { :action_block => '{block}' }
+      @route_handler.add_route(:not_found, route_options)
+      @route_handler.routes[:not_found].should eql(route_options)
     end
   end
 
