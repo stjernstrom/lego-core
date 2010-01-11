@@ -17,7 +17,9 @@ class Lego::Controller
     #
 
     def inherited(class_inheriting)
-      class_inheriting.const_set(:ActionContext, Class.new(Lego::Controller::ActionContext))
+      class_inheriting.const_set(:ActionContext, Class.new(Lego::Controller::ActionContext) do
+        const_set :CurrentClass, class_inheriting
+      end)
       class_inheriting.const_set(:RouteHandler,  Module).extend Lego::Controller::RouteHandler
       class_inheriting.const_set(:Config,        Module.new { extend Lego::Controller::Config })
     end

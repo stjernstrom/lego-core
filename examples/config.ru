@@ -1,4 +1,4 @@
-require 'lego'
+require File.join(File.expand_path(File.dirname(__FILE__)), '..',  'lib', 'lego')
 
 module BasicRoutes
   def self.register(lego)
@@ -57,6 +57,7 @@ module SymbolExtractor
 end
 
 class MyBlog < Lego::Controller
+  set :foo => "bar"
 
   plugin BasicRoutes
   plugin RegexpMatcher
@@ -78,6 +79,10 @@ class MyBlog < Lego::Controller
 
   get '/show/:id' do
     "This is show with id = #{@id}"
+  end
+
+  get '/options' do
+    "foo => #{options(:foo)}"
   end
 end
 

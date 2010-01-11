@@ -1,8 +1,8 @@
 module Lego::Controller::Config
   extend self
   
-  def extended(klass)
-    klass.instance_eval do
+  def extended(mod)
+    mod.instance_eval do
       def config
         @config ||= {}.merge(Lego::Controller::Config.config)
       end
