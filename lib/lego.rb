@@ -18,5 +18,6 @@ module Lego
   end
 
   autoload :Controller,    'lego/controller'
+  autoload :Plugin,        'lego/plugin'
 
 end

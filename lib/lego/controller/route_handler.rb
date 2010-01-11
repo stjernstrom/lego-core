@@ -11,7 +11,11 @@ module Lego::Controller::RouteHandler
   extend self
 
   def add_route(method, options)
-    routes[method] << options 
+    if method == :not_found
+      routes[:not_found] = options
+    else
+      routes[method] << options 
+    end
   end
 
   # Getter for cached instance variable holding routes.
@@ -58,11 +62,12 @@ private
 
   def cached_routes
     @route_cache ||= {
-      :get    => [],
-      :post   => [],
-      :put    => [],
-      :head   => [],
-      :delete => []
+      :get       => [],
+      :post      => [],
+      :put       => [],
+      :head      => [],
+      :delete    => [],
+      :not_found => nil
     }
   end
 

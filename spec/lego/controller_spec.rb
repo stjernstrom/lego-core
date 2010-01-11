@@ -10,6 +10,10 @@ describe Lego::Controller do
     Lego::Controller::RouteHandler.should be_kind_of(Module)
   end
 
+    it 'should load Lego::Plugin::Controller::NotFound by default' do
+      Lego::Controller.methods.should include('not_found')
+    end
+
   context 'when inherited' do
     before do
       create_new_app("MyController", Lego::Controller)
@@ -87,6 +91,7 @@ describe Lego::Controller do
       MyApp::RouteHandler.should_receive(:add_route).with(method, route)
       MyApp.add_route(method, route)
     end
+    after { rm_const 'MyApp' }
   end
 
   context '.add_plugin :router, <plugin_module>' do
@@ -119,41 +124,64 @@ describe Lego::Controller do
     end
   end
 
-  context '.call <env> with a route that matches' do
-    before do
-      @env = ["Environment"]
-      create_new_app("MyApp", Lego::Controller)
-      MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return("route")
+  context '.call <env>' do
+    context 'with a route that matches' do
+      before do
+        @env = ["Environment"]
+        create_new_app("MyApp", Lego::Controller)
+        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return("route")
+      end
+
+      it 'should create a new instance of ActionContext' do
+        mock = mock("ActionContext instance")
+        mock.should_receive(:run).with("route", @env)
+        MyApp::ActionContext.should_receive(:new).and_return(mock)
+      end
+
+      after do
+        MyApp.call(@env)
+        rm_const "MyApp"
+      end
     end
 
-    it 'should create a new instance of ActionContext' do
-      mock = mock("ActionContext instance")
-      mock.should_receive(:run).with("route", @env)
-      MyApp::ActionContext.should_receive(:new).and_return(mock)
+    context 'with a route that don\'t matches' do
+      before do
+        @env = ["Environment"]
+        create_new_app("MyApp", Lego::Controller)
+        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
+      end
+
+      it 'should create a new instance of ActionContext' do
+        MyApp::ActionContext.should_not_receive(:new)
+      end
+
+      after do
+        MyApp.call(@env).should eql(
+          [404, {'Content-Type' => 'text/html'}, '404 - Not found']
+        )
+        rm_const "MyApp"
+      end
     end
 
-    after do
-      MyApp.call(@env)
-      rm_const "MyApp"
-    end
-  end
+    context 'without matching route and a :not_found route defined' do
+      before do
+        @env = ["Rack Env"]
+        @routes = { :not_found => {}}
+        create_new_app("MyApp", Lego::Controller)
+        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
+        MyApp::RouteHandler.should_receive(:routes).and_return( @routes )
+      end
 
-  context '.call <env> with a route that don\'t matches' do
-    before do
-      @env = ["Environment"]
-      create_new_app("MyApp", Lego::Controller)
-      MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
-    end
+      it 'should create a new ActionContext with the :not_found route' do
+        action_context = mock("ActionContext instance")
+        MyApp::ActionContext.should_receive(:new).and_return(action_context)
+        action_context.should_receive(:run).with(@routes[:not_found], @env)
+      end
 
-    it 'should create a new instance of ActionContext' do
-      MyApp::ActionContext.should_not_receive(:new)
-    end
-
-    after do
-      MyApp.call(@env).should eql(
-        [404, {'Content-Type' => 'text/html'}, '404 - Not found']
-      )
-      rm_const "MyApp"
+      after do
+        MyApp.call(@env)
+        rm_const "MyApp"
+      end
     end
   end
 
