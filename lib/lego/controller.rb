@@ -20,7 +20,9 @@ class Lego::Controller
       class_inheriting.const_set(:ActionContext, Class.new(Lego::Controller::ActionContext) do
         const_set :ApplicationClass, class_inheriting
       end)
-      class_inheriting.const_set(:RouteHandler,  Lego::Controller::RouteHandler.clone)
+
+      # class_inheriting.const_set(:RouteHandler, Class.new(Lego::Controller::RouteHandler))
+      class_inheriting.const_set(:RouteHandler, Module.new { extend Lego::Controller::RouteHandler })
       class_inheriting.const_set(:Config,        Module.new { extend Lego::Controller::Config })
     end
 
@@ -39,14 +41,19 @@ class Lego::Controller
     #
 
     def add_plugin(context, plugin_module)
+
       base = (self == Lego::Controller) ? Lego::Controller : self 
+
+      puts "add_plugin: #{plugin_module.to_s} -> #{base.to_s}"
+
       case context
       when :controller
         base.extend plugin_module
       when :router
+        # puts plugin_module.to_s + " -> " + base::RouteHandler.object_id.to_s
         base::RouteHandler.add_matcher plugin_module 
       when :view
-        self::ActionContext.instance_eval do
+        base::ActionContext.instance_eval do
           include plugin_module
         end
       end
@@ -86,6 +93,7 @@ class Lego::Controller
     #
 
     def plugin(plugin_module)
+      puts "Register: #{plugin_module.to_s} ON #{self.inspect}"
       plugin_module.register(self)
     end
 
