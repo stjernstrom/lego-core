@@ -20,3 +20,23 @@ def rm_const(*const_name)
   end
 end
 
+def reset_lego_base
+  return if not Object.const_defined? :Lego 
+  Lego.class_eval do
+    Lego::Controller.class_eval do
+      remove_const :RouteHandler if const_defined? :RouteHandler
+      remove_const :ActionContext if const_defined? :ActionContext
+    end
+    remove_const :Controller if const_defined? :Controller
+  end
+  Object.class_eval do
+    remove_const :Lego  
+  end
+  load 'lib/lego.rb'
+  load 'lib/lego/plugin.rb'
+  load 'lib/lego/plugin/controller/not_found.rb'
+  load 'lib/lego/controller.rb'
+  load 'lib/lego/controller/route_handler.rb'
+  load 'lib/lego/controller/action_context.rb'
+  load 'lib/lego/controller/config.rb'
+end

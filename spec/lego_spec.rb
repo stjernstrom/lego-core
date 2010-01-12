@@ -38,6 +38,9 @@ describe Lego do
     end
 
     context 'when plugin context is :controller' do
+      before do
+        reset_lego_base
+      end
       it 'should be injected to Lego::Controller base' do
         module MyPlug
           def self.register(lego)
@@ -58,8 +61,11 @@ describe Lego do
     end
 
     context 'when plugin context is :router' do
+      before do
+        reset_lego_base
+      end
       it 'should be injected to Lego::Controller::RouteHandler base' do
-        module GlobalPlug
+        module GlobalPlugX
           def self.register(lego)
             lego.add_plugin :router, self
           end
@@ -71,34 +77,14 @@ describe Lego do
           def self.match_route(route, env); end
         end
         
-        Object.const_set(:App1Plug, GlobalPlug.clone)
-        Object.const_set(:App2Plug, GlobalPlug.clone)
-
-        Lego.plugin GlobalPlug
-
-        create_new_app("MyApp1", Lego::Controller)
-        create_new_app("MyApp2", Lego::Controller)
-
-        MyApp1.plugin App1Plug
-        MyApp2.plugin App2Plug
-
-        puts ""
-        puts "MyApp1: #{MyApp1.object_id.to_s}"
-        puts "MyApp2: #{MyApp2.object_id.to_s}"
-        puts "Lego: #{Lego::Controller.object_id.to_s}"
-        puts "MyApp1::RouteHandler: #{MyApp1::RouteHandler.object_id.to_s}"
-        puts "MyApp2::RouteHandler: #{MyApp2::RouteHandler.object_id.to_s}"
-        puts "Lego::Controller::RouteHandler: #{Lego::Controller::RouteHandler.object_id.to_s}"
-        Lego::Controller::RouteHandler.matchers.should eql([GlobalPlug])
-        MyApp1::RouteHandler.matchers.should eql([GlobalPlug, App1Plug])
-        MyApp2::RouteHandler.matchers.should eql([GlobalPlug, App2Plug])
+        Lego.plugin GlobalPlugX
+        Lego::Controller::RouteHandler.matchers.should eql([GlobalPlugX])
       end
 
       after do
-        rm_const "GlobalPlug", "App1Plug", "App2Plug", "MyApp1", "MyApp2"
+        rm_const "GlobalPlug"
       end
     end
-
   end
 
 end

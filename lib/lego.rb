@@ -17,19 +17,19 @@ module Lego
     VERSION.join(".")
   end
 
+  autoload :Controller,    'lego/controller'
+  autoload :Plugin,        'lego/plugin'
+
+  def self.config(&block)
+    class_eval &block
+  end
+
   #
   # plugin lets a plugin register itself globally
   #
 
   def self.plugin(plugin_module)
     plugin_module.register(Lego::Controller)
-  end
-
-  autoload :Controller,    'lego/controller'
-  autoload :Plugin,        'lego/plugin'
-
-  def self.config(&block)
-    class_eval &block
   end
 
   def self.set(options={})

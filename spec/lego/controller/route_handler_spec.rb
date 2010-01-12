@@ -134,6 +134,43 @@ describe Lego::Controller::RouteHandler do
     end
   end
 
+  context 'when extended' do
+    it 'plugins should be copied from base class' do
+
+      module GlobalPlug
+        def self.register(lego)
+          lego.add_plugin :router, self
+        end
+
+        def another_routehandler 
+          add_route(:get, {})
+        end
+
+        def self.match_route(route, env); end
+      end
+
+      # Create two fake plugins
+      Object.const_set(:App1Plug, GlobalPlug.clone)
+      Object.const_set(:App2Plug, GlobalPlug.clone)
+
+      Lego.plugin GlobalPlug
+
+      create_new_app("MyApp1", Lego::Controller)
+      create_new_app("MyApp2", Lego::Controller)
+
+      MyApp1.plugin App1Plug
+      MyApp2.plugin App2Plug
+
+      Lego::Controller::RouteHandler.matchers.should eql([GlobalPlug])
+      MyApp1::RouteHandler.matchers.should eql([GlobalPlug, App1Plug])
+      MyApp2::RouteHandler.matchers.should eql([GlobalPlug, App2Plug])
+    end
+
+    after do
+      rm_const "GlobalPlug", "App1Plug", "App2Plug", "MyApp1", "MyApp2"
+    end
+  end
+
 end
 
 def empty_route_handler
