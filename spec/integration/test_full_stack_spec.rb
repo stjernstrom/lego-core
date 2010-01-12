@@ -4,6 +4,7 @@ describe 'Full stack request' do
 
   context 'with no routes specified' do
     before do
+      reset_lego_base
       class MyApp < Lego::Controller; end
       rack_env = {
       'PATH_INFO' => '/' ,
@@ -20,6 +21,61 @@ describe 'Full stack request' do
 
     after do
       rm_const 'MyApp'
+    end
+  end
+
+  context 'with global plugins' do
+    before do
+
+      reset_lego_base
+
+      module GlobalPlugin
+        def self.register(lego)
+          lego.add_plugin :view, View
+          lego.add_plugin :router, Matcher
+          lego.add_plugin :controller, Routes
+        end
+        module View
+          def h1(content)
+            "<h1>#{content}</h1>"
+          end
+        end
+        module Routes
+          def get(path, &block)
+            add_route(:get, {:path => path, :action_block => block})
+
+          end
+        end
+        module Matcher
+          def self.match_route(route, env)
+            (route[:path] == env['PATH_INFO']) ? true : false
+          end
+        end
+      end
+
+      Lego.plugin GlobalPlugin
+
+      class App1 < Lego::Controller
+        get '/hello' do
+          h1 'Hello world'
+        end
+      end
+
+      rack_env = {
+      'PATH_INFO' => '/hello' ,
+      'REQUEST_METHOD' => 'GET'
+      }
+      @result = App1.call(rack_env)
+    end
+
+    it 'should respond with with valid data' do
+      @result[0].should eql(200)
+      @result[1].should eql({"Content-Type"=>"text/html"})
+      @result[2].should eql('<h1>Hello world</h1>')
+    end
+
+    after do
+      rm_const 'App1', 'App2'
     end
   end
 
