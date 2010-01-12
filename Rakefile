@@ -44,6 +44,20 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "lego-core"
+    gemspec.summary = "lego-core the dumb ruby webframework"
+    gemspec.description = "lego-core the dumb ruby webframework"
+    gemspec.email = "mathias@globalinn.com"
+    gemspec.homepage = "http://github.com/stjernstrom/lego-core"
+    gemspec.authors = ["Mathias Stjernstrom", "Patrik Hedman"]
+  end
+rescue LoadError
+  puts "Jeweler not available. Install it with: gem install jeweler"
+end
+
 task :show_all_tasks do
   system "rake -T"
 end
