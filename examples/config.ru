@@ -82,6 +82,9 @@ class MyBlog < Lego::Controller
 
   #
   # Ex: http://localhost:9393/extract/something.jpg
+  # Sets up an instance variable with the matches
+  #     @caps[0] => 'something'
+  #     @caps[1] => 'jpg'
   #
   get /extract\/(\w+)\.(\w+)/ do
     "We are extracting....#{@caps.inspect}" 
@@ -94,12 +97,17 @@ class MyBlog < Lego::Controller
     "This is /"
   end
 
+  #
+  # ex: http://localhost:9393/show/10
+  # Sets up an instance variable with the id
+  #   @id => 10
+  #
   get '/show/:id' do
     "This is show with id = #{@id}"
   end
 
   get '/options' do
-    "foo => " + options(:foo)
+    options :foo # renders bar to the browser
   end
 
   #
