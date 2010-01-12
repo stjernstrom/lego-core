@@ -14,6 +14,20 @@ describe Lego do
     it 'should have a version' do
       Lego.version.should == Lego::VERSION.join('.')
     end
+
+    it "should provide a global set" do
+      Lego.set(:foo => "bar")
+      Lego::Controller.current_config.config.should eql({"foo"=>"bar"})
+    end
+
+    it "should provide a global config" do
+      Lego.config do
+        set :foo => "bar"
+        set :baz => "quux"
+      end
+
+      Lego::Controller.current_config.config.should eql({"foo"=>"bar","baz"=>"quux"})
+    end
   end
 
   context '.plugin <plugin_module>' do
@@ -68,8 +82,6 @@ describe Lego do
         MyApp1.plugin App1Plug
         MyApp2.plugin App2Plug
 
-Flytta till route hanlder, men minska nerh \r.....
-
         puts ""
         puts "MyApp1: #{MyApp1.object_id.to_s}"
         puts "MyApp2: #{MyApp2.object_id.to_s}"
@@ -86,6 +98,7 @@ Flytta till route hanlder, men minska nerh \r.....
         rm_const "GlobalPlug", "App1Plug", "App2Plug", "MyApp1", "MyApp2"
       end
     end
+
   end
 
 end
