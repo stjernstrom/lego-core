@@ -48,8 +48,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
     gemspec.name = "lego-core"
-    gemspec.summary = "lego-core the dumb ruby webframework"
-    gemspec.description = "lego-core the dumb ruby webframework"
+    gemspec.summary = "It's all about the bits and peices"
+    gemspec.description = "It's all about the bits and peices"
     gemspec.email = "mathias@globalinn.com"
     gemspec.homepage = "http://github.com/stjernstrom/lego-core"
     gemspec.authors = ["Mathias Stjernström", "Patrik Hedman"]
