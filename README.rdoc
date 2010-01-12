@@ -1,21 +1,93 @@
 = Lego-core
 
+It's all about the bits an pieces!
+
+== Installation
+
+  sudo gem install lego-core
+
 == TODO
 
-- Add a new README and let README.rdoc only be used in the rdoc documentation.
-- Add methods for loading plugins globally.
+- Write a text that describe what we are trying to do, and why :)
+- Write a roadmap for lego-core
 - Add before and after filter handling.
+
+== Example plugin (plugin.rb)
+
+  # This is a sample plugin that extends a few different Lego contexts.
+  #
+  # - View plugin
+  # - Controller plugin
+  # - Route matcher plugin
+  #
+  # This code will prob. be held in a different gem
+  
+  module SamplePlugin
+
+    # Register is called by lego when plugin is loaded
+
+    def self.register(lego)
+      lego.add_plugin :view, View
+      lego.add_plugin :router, Matcher
+      lego.add_plugin :controller, Routes
+    end
+
+    # A plugin module we load as a view helper
+
+    module View
+      def h1(content)
+        "<h1>#{content}</h1>"
+      end
+    end
+
+    # A very simply route helper
+
+    module Routes
+      def get(path, &block)
+        add_route(:get, {:path => path, :action_block => block})
+      end
+    end
+    
+    # A very simple route matcher
+
+    module Matcher
+      def self.match_route(route, env)
+        (route[:path] == env['PATH_INFO']) ? true : false
+      end
+    end
+  end
+  
+== Example Lego Application (my_app.rb)
+  
+  # This is how our Lego app would look with this plugin.
+
+  Lego.plugin SamplePlugin
+
+  class MyApp < Lego::Controller
+    get '/hello' do
+      h1 'Hello world'
+    end
+  end
+
+== Example Rackup/Shotgun file (config.ru)
+
+  # This is how you would use it with rack.
+
+  require 'plugin'
+  require 'my_app'
+
+  run MyApp 
+
+== Example run
+
+  # Start this app by running shotgun or rackup (these gems nees to be installed)
+  
+  shotgun config.ru
 
 == Thoughts
 
 - Move ActionContext and RouteHandler into different module that controller?
 - Add a plugin Context for before and after filters to make them pluggable?
+- Make the whole framework run inside an instance instead of as class methods?
 - When route is matchen with a different method than the one requested you should not respond 404, support for this?
-
-== Example controller
-
-This is a sample of a custom Lego controller included from examples/config.ru
-
-  :include:examples/config.ru
-
 
