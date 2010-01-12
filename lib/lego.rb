@@ -20,4 +20,11 @@ module Lego
   autoload :Controller,    'lego/controller'
   autoload :Plugin,        'lego/plugin'
 
+  def self.config(&block)
+    class_eval &block
+  end
+
+  def self.set(options={})
+    Lego::Controller.set options
+  end
 end
