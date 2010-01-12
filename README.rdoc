@@ -73,6 +73,8 @@ It's all about the bits an pieces!
 
   # This is how you would use it with rack.
 
+  require 'rubygems'
+  require 'lego-core'
   require 'plugin'
   require 'my_app'
 
