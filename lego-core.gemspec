@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mathias Stjernstr\303\266m", "Patrik Hedman"]
   s.date = %q{2010-01-12}
-  s.description = %q{lego-core the dumb ruby webframework}
+  s.description = %q{It's all about the bits and peices}
   s.email = %q{mathias@globalinn.com}
   s.extra_rdoc_files = [
     "README.rdoc"
@@ -44,7 +44,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.5}
-  s.summary = %q{lego-core the dumb ruby webframework}
+  s.summary = %q{It's all about the bits and peices}
   s.test_files = [
     "spec/integration/test_full_stack_spec.rb",
      "spec/lego/controller/action_context_spec.rb",

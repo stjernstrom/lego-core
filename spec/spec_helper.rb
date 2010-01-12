@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
 
-require 'lib/lego'
+require 'lib/lego-core'
 require 'spec'
 
 def create_new_app(class_name, baseclass = Class)
@@ -32,7 +32,7 @@ def reset_lego_base
   Object.class_eval do
     remove_const :Lego  
   end
-  load 'lib/lego.rb'
+  load 'lib/lego-core.rb'
   load 'lib/lego/plugin.rb'
   load 'lib/lego/plugin/controller/not_found.rb'
   load 'lib/lego/controller.rb'

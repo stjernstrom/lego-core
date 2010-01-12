@@ -64,9 +64,11 @@ It's all about the bits an pieces!
   Lego.plugin SamplePlugin
 
   class MyApp < Lego::Controller
+
     get '/hello' do
       h1 'Hello world'
     end
+
   end
 
 == Example Rackup/Shotgun file (config.ru)
@@ -85,6 +87,8 @@ It's all about the bits an pieces!
   # Start this app by running shotgun or rackup (these gems nees to be installed)
   
   shotgun config.ru
+
+  # Now open up a web browser and point it to http://127.0.0.1:9393/hello or :9292 if you are using rackup
 
 == Thoughts
 
