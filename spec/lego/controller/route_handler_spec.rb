@@ -135,6 +135,9 @@ describe Lego::Controller::RouteHandler do
   end
 
   context 'when extended' do
+    before do
+      reset_lego_base
+    end
     it 'plugins should be copied from base class' do
 
       module GlobalPlug
