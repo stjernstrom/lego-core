@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Mathias Stjernstrom", "Patrik Hedman"]
+  s.authors = ["Mathias Stjernstr\303\266m", "Patrik Hedman"]
   s.date = %q{2010-01-12}
   s.description = %q{lego-core the dumb ruby webframework}
   s.email = %q{mathias@globalinn.com}
@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "examples/config.ru",
+     "lego-core.gemspec",
      "lib/lego.rb",
      "lib/lego/controller.rb",
      "lib/lego/controller/action_context.rb",
