@@ -14,7 +14,7 @@ module BasicRoutes
 
   module RouteMatcher
     def self.match_route(route, env)
-      (route[:path] == env['PATH_INFO']) ? true : false
+      (route[:path] == env['PATH_INFO']) ? [env, {}] : false
     end
   end
 end
@@ -26,8 +26,9 @@ module RegexpMatcher
 
   def self.match_route(route, env)
     if route[:path].is_a?(Regexp) && match = route[:path].match(env['PATH_INFO'])
-      route[:instance_vars] = { :caps => match.captures }
-      true
+      match_data = {}
+      match_data[:instance_vars] = { :caps => match.captures }
+      [env, match_data]
     else
       false
     end
@@ -45,11 +46,12 @@ module SymbolExtractor
     if matches.size > 0 
       exp = Regexp.escape( route[:path] ).gsub(/:([\w]+)/, "([\\w]+)") 
       if match = Regexp.new("^#{exp}$").match(env["PATH_INFO"]) 
-        route[:instance_vars] = {} if route[:instance_vars].nil?  
+        match_data = {}
+        match_data[:instance_vars] = {}
         1.upto(matches.size) do |i| 
-           route[:instance_vars][matches[i-1]] = match.captures[i-1] 
+           match_data[:instance_vars][matches[i-1]] = match.captures[i-1] 
          end 
-        return true   
+        return [env, match_data]
       end 
     end 
     false 

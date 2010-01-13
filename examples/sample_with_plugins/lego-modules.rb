@@ -12,7 +12,7 @@ module SimpleRouter
 
   module RouteMatcher
     def self.match_route(route, env)
-      (route[:path] == env['PATH_INFO']) ? true : false
+      (route[:path] == env['PATH_INFO']) ? [env, {}] : false
     end
   end
 end
