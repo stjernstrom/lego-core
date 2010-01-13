@@ -88,6 +88,38 @@ describe Lego::Controller::RouteHandler do
     end
   end
 
+  context '.add_route with global plugins' do
+    before do
+      module RouterPlugin
+        reset_lego_base
+        def self.register(lego)
+          lego.add_plugin(:controller, self)
+        end
+        def get(path)
+          add_route(:get, {:path => path})
+        end
+      end
+      Lego.plugin RouterPlugin
+
+      class App1 < Lego::Controller
+        get('/app1')
+      end
+
+      class App2 < Lego::Controller
+        get('/app2')
+      end
+    end
+   
+    it 'should not share routes between apps' do
+      App1::RouteHandler.routes[:get].should eql([:path => "/app1"])
+      App2::RouteHandler.routes[:get].should eql([:path => "/app2"])
+    end
+
+    after do
+      rm_const 'App1', 'App2'
+    end
+  end
+
   context '.matchers' do
     before do
       @route_handler = empty_route_handler

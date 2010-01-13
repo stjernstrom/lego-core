@@ -16,7 +16,6 @@ module Lego::Controller::RouteHandler
 
   def extended(base)
     base.matchers.concat(matchers)
-    base.routes.merge!(routes)
   end
 
   def add_route(method, options)
