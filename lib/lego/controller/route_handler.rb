@@ -50,7 +50,8 @@ module Lego::Controller::RouteHandler
 
   def run_matchers(route, env)
     matchers.each do |matcher|
-      return true if matcher.match_route(route, env) == true
+      match = matcher.match_route(route, env)
+      return match if match.kind_of?(Array)  
     end
     false
   end
