@@ -52,7 +52,7 @@ It's all about the bits an pieces!
 
     module Matcher
       def self.match_route(route, env)
-        (route[:path] == env['PATH_INFO']) ? true : false
+        (route[:path] == env['PATH_INFO']) ? [env, {}] : false
       end
     end
   end
