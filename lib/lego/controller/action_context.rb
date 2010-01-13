@@ -4,6 +4,10 @@
 class Lego::Controller::ActionContext
 
   attr_accessor :response, :env, :route, :match_data
+
+  def self.middlewares
+    @middlewares ||= []
+  end
   
   def initialize
     setup_defaults
