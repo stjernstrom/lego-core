@@ -165,13 +165,15 @@ describe Lego::Controller do
     context 'with a route that matches' do
       before do
         @env = ["Environment"]
+        @match_data = [:foo => "bar"]
+        @match_route = [:route => "route"]
         create_new_app("MyApp", Lego::Controller)
-        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return("route")
+        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return([@match_route, @env, @match_data])
       end
 
       it 'should create a new instance of ActionContext' do
         mock = mock("ActionContext instance")
-        mock.should_receive(:run).with("route", @env)
+        mock.should_receive(:run).with([@match_route, @env, @match_data])
         MyApp::ActionContext.should_receive(:new).and_return(mock)
       end
 
@@ -212,7 +214,7 @@ describe Lego::Controller do
       it 'should create a new ActionContext with the :not_found route' do
         action_context = mock("ActionContext instance")
         MyApp::ActionContext.should_receive(:new).and_return(action_context)
-        action_context.should_receive(:run).with(@routes[:not_found], @env)
+        action_context.should_receive(:run).with([@routes[:not_found], @env, {}])
       end
 
       after do

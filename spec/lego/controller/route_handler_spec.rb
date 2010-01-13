@@ -15,8 +15,8 @@ describe Lego::Controller::RouteHandler do
     it 'should return Array matching route found' do
       @route_handler.should_receive(:routes).and_return(@fake_routes)
       @route_handler.should_receive(:run_matchers).with(@other_route, @env).exactly(2).times.and_return(false)
-      @route_handler.should_receive(:run_matchers).with(@valid_route, @env).and_return(true)
-      @route_handler.match_all_routes(@env).should eql(@valid_route)
+      @route_handler.should_receive(:run_matchers).with(@valid_route, @env).and_return([@env, [:var => "some var"]])
+      @route_handler.match_all_routes(@env).should eql( [@valid_route, @env, [:var => "some var"]] )
     end
     
     it 'should return false when no matching route is found' do
@@ -38,9 +38,9 @@ describe Lego::Controller::RouteHandler do
     
     it 'should return Array when matching route found' do
       Match1.should_receive(:match_route).with(@route, @env).and_return(false)
-      Match2.should_receive(:match_route).with(@route, @env).and_return([@route, @env, [ :var => "a var"]])
+      Match2.should_receive(:match_route).with(@route, @env).and_return([@env, { :var => "a var"}])
       @route_handler.should_receive(:matchers).and_return(@matchers)
-      @route_handler.run_matchers(@route, @env).should eql([@route, @env, [ :var => "a var"]])
+      @route_handler.run_matchers(@route, @env).should eql([@env, { :var => "a var"}])
     end
     
     it 'should return false when no matching route found' do

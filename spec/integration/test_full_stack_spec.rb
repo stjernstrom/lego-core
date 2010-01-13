@@ -48,7 +48,8 @@ describe 'Full stack request' do
         end
         module Matcher
           def self.match_route(route, env)
-            (route[:path] == env['PATH_INFO']) ? true : false
+            match_data = { :instance_vars => { :foo => "bar" }}
+            (route[:path] == env['PATH_INFO']) ? [env, match_data] : false
           end
         end
       end
@@ -57,7 +58,7 @@ describe 'Full stack request' do
 
       class App1 < Lego::Controller
         get '/hello' do
-          h1 'Hello world'
+          h1 "Hello world, #{@foo}"
         end
       end
 
@@ -71,7 +72,7 @@ describe 'Full stack request' do
     it 'should respond with with valid data' do
       @result[0].should eql(200)
       @result[1].should eql({"Content-Type"=>"text/html"})
-      @result[2].should eql('<h1>Hello world</h1>')
+      @result[2].should eql('<h1>Hello world, bar</h1>')
     end
 
     after do

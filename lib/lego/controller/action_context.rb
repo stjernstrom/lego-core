@@ -3,7 +3,7 @@
 
 class Lego::Controller::ActionContext
 
-  attr_accessor :response, :env, :route
+  attr_accessor :response, :env, :route, :match_data
   
   def initialize
     setup_defaults
@@ -13,9 +13,8 @@ class Lego::Controller::ActionContext
     "#{self.class::ApplicationClass.current_config.options(key)}"
   end
 
-  def run(route, env)
-    @route = route
-    @env = env 
+  def run(match_data)
+    @route, @env, @match_data = match_data
     setup_instance_vars_from_route
     evaluate_action
     [@response[:code], @response[:headers], @response[:body]]
@@ -29,10 +28,10 @@ private
   #
 
   def setup_instance_vars_from_route
-    @route[:instance_vars].each_key do |var|
-      instance_variable_set("@#{var}", @route[:instance_vars][var])
-    end if @route[:instance_vars]
-    @response[:code] = @route[:set_response_code] if @route[:set_response_code]
+    @match_data[:instance_vars].each_key do |var|
+      instance_variable_set("@#{var}", @match_data[:instance_vars][var])
+    end if @match_data[:instance_vars]
+    @response[:code] = @match_data[:set_response_code] if @match_data[:set_response_code]
   end
 
   #

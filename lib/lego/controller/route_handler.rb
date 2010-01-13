@@ -51,7 +51,7 @@ module Lego::Controller::RouteHandler
   def run_matchers(route, env)
     matchers.each do |matcher|
       match = matcher.match_route(route, env)
-      return match if match.kind_of?(Array)  
+      return match if match.kind_of?(Array)
     end
     false
   end
@@ -59,7 +59,9 @@ module Lego::Controller::RouteHandler
   def match_all_routes(env)
     method = extract_method_from_env(env)
     routes[method].each do |route|
-      return route if run_matchers(route, env)
+      if match_data = run_matchers(route, env)
+        return [route] | match_data
+      end
     end
     nil 
   end
