@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{lego-core}
-  s.version = "0.0.2"
+  s.version = "0.0.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mathias Stjernstr\303\266m", "Patrik Hedman"]
-  s.date = %q{2010-01-12}
+  s.date = %q{2010-01-13}
   s.description = %q{It's all about the bits and peices}
   s.email = %q{mathias@globalinn.com}
   s.extra_rdoc_files = [
@@ -21,6 +21,9 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "examples/config.ru",
+     "examples/sample_with_plugins/config.ru",
+     "examples/sample_with_plugins/hello.erb",
+     "examples/sample_with_plugins/lego-modules.rb",
      "lego-core.gemspec",
      "lib/lego-core.rb",
      "lib/lego/controller.rb",
@@ -54,7 +57,8 @@ Gem::Specification.new do |s|
      "spec/lego/plugin/controller/not_found_spec.rb",
      "spec/lego/plugin_spec.rb",
      "spec/lego_spec.rb",
-     "spec/spec_helper.rb"
+     "spec/spec_helper.rb",
+     "examples/sample_with_plugins/lego-modules.rb"
   ]
 
   if s.respond_to? :specification_version then
