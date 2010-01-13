@@ -183,6 +183,26 @@ describe Lego::Controller do
       end
     end
 
+    context 'without a route match and a not_found route defined' do
+      before do
+        @env = []
+        @block = lambda { "404, gone." } 
+        create_new_app("MyApp", Lego::Controller)
+        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
+        MyApp::RouteHandler.should_receive('routes').and_return({:not_found => { :action_block => @block }})
+      end
+
+      it 'should get a valid 404 response with the block data' do
+        MyApp.call(@env).should eql(
+          [404, {'Content-Type' => 'text/html'}, '404, gone.']
+        )
+      end
+
+      after do
+        rm_const "MyApp"
+      end
+    end
+
     context 'with a route that don\'t matches' do
       before do
         @env = ["Environment"]
@@ -202,26 +222,6 @@ describe Lego::Controller do
       end
     end
 
-    context 'without matching route and a :not_found route defined' do
-      before do
-        @env = ["Rack Env"]
-        @routes = { :not_found => {}}
-        create_new_app("MyApp", Lego::Controller)
-        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
-        MyApp::RouteHandler.should_receive(:routes).and_return( @routes )
-      end
-
-      it 'should create a new ActionContext with the :not_found route' do
-        action_context = mock("ActionContext instance")
-        MyApp::ActionContext.should_receive(:new).and_return(action_context)
-        action_context.should_receive(:run).with([@routes[:not_found], @env, {}])
-      end
-
-      after do
-        MyApp.call(@env)
-        rm_const "MyApp"
-      end
-    end
   end
 
   context ".set" do
