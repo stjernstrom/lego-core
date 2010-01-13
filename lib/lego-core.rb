@@ -7,7 +7,7 @@ module Lego
   file_path = File.expand_path( File.dirname(__FILE__) )
   $LOAD_PATH.unshift( file_path ) unless $LOAD_PATH.include?( file_path )
 
-  VERSION = [0,0,1]
+  VERSION = [0,0,3]
 
   #
   # Return the current Lego version.
