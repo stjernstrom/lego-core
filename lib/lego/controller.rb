@@ -120,27 +120,6 @@ class Lego::Controller
     end
 
     #
-    # Use environment to define environment specific configuration options 
-    #
-    # Usage:
-    #   Lego::Controller.environment :development do
-    #     set :foo => "bar"
-    #   end
-    #
-    # or set environment agnostic configuration options by leaving out the environment parameter
-    #
-    # Usage:
-    #   Lego::Controller.environment do
-    #     set :foo => "bar"
-    #   end
-    #
-
-    def environment(env=nil, &block)
-      raise ArgumentError, "No block provided" unless block_given?
-      current_config.environment(env, &block)
-    end
-
-    #
     # call is used to handle an incomming Rack request. 
     #
     # If no matching route is found we check for a defined :not_found route

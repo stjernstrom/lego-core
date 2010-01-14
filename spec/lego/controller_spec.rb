@@ -250,52 +250,6 @@ describe Lego::Controller do
     end
   end
 
-  context ".environment <env>" do
-    
-    context 'on Lego::Controller' do
-
-      before do
-        @config_block = lambda {}
-      end
-
-      it 'should proxy the method call to its own config' do
-        Lego::Controller::Config.should_receive(:environment).with(nil, &@config_block).and_return(nil)
-        Lego::Controller.environment(&@config_block)
-      end
-
-      it 'take an optional <env> argument' do
-        Lego::Controller::Config.should_receive(:environment).
-                                 with('development', &@config_block).
-                                 and_return(nil)
-
-        Lego::Controller.environment('development', &@config_block)
-      end
-
-      it 'should raise an ArgumentError if no block is provided' do
-        lambda { 
-          Lego::Controller.environment(:development) 
-        }.should raise_error(ArgumentError, "No block provided")
-      end
-    end
-
-    context 'on subclasses' do
-
-      before do
-        create_new_app "MyApp", Lego::Controller
-        @config_block = lambda {}
-      end
-
-      it 'should proxy the method call to its own config' do
-        MyApp::Config.should_receive(:environment).with(nil, &@config_block).and_return(nil)
-        MyApp.environment(&@config_block)
-      end
-
-      after do
-        rm_const "MyApp"
-      end
-    end
-  end
-
   context ".use <middleware>" do
     before do
       class Middleware1;end
