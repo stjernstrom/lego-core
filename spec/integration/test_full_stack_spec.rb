@@ -82,7 +82,7 @@ describe 'Full stack request' do
 
   context 'using middlewares' do
     before do
-      Lego::Controller::ActionContext.middlewares.clear
+      Lego::Controller.middlewares.clear
 
       reset_lego_base
 
@@ -207,9 +207,9 @@ describe 'Full stack request' do
     end
 
     after do
-      Lego::Controller::ActionContext.middlewares.clear
-      App1::ActionContext.middlewares.clear
-      App2::ActionContext.middlewares.clear
+      Lego::Controller.middlewares.clear
+      App1.middlewares.clear
+      App2.middlewares.clear
       rm_const 'App1', 'App2'
     end
   end

@@ -5,17 +5,17 @@ class Lego::Controller::ActionContext
 
   attr_accessor :response, :env, :route, :match_data
 
-  def self.inherited(subclass)
-    subclass.instance_eval do
-      def self.middlewares
-        @middlewares ||= ([] << Lego::Controller::ActionContext.middlewares).flatten
-      end
-    end
-  end
+  #def self.inherited(subclass)
+  #  subclass.instance_eval do
+  #    def self.middlewares
+  #      @middlewares ||= ([] << Lego::Controller::ActionContext.middlewares).flatten
+  #    end
+  #  end
+  #end
 
-  def self.middlewares
-    @middlewares ||= []
-  end
+  #def self.middlewares
+  #  @middlewares ||= []
+  #end
   
   def initialize
     setup_defaults
@@ -28,16 +28,16 @@ class Lego::Controller::ActionContext
   def run(match_data)
     @route, @env, @match_data = match_data
 
-    middleware_chain_for(application).call(@env)
+    setup_instance_vars
+    evaluate_action
+    #middleware_chain_for(application).call(@env)
+    [@response[:code], @response[:headers], @response[:body]]
   end
 
 private
 
   def application
     lambda do |env|
-      setup_instance_vars
-      evaluate_action
-      [@response[:code], @response[:headers], @response[:body]]
     end
   end
 

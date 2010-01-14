@@ -88,42 +88,5 @@ describe Lego::Controller::ActionContext do
       @inst.instance_variable_get(:@params).should eql( @hash_var )
     end
   end
-
-  context ".middlewares reader method" do
-
-    before do
-      ActionContext = Lego::Controller::ActionContext.dup
-    end
-
-    it "should return an empty array when no middlewares are used" do
-      ActionContext.middlewares.should eql([])
-    end
-
-    after do
-      rm_const "ActionContext"
-    end
-  end
-
-  context ".use <middleware>" do
-    before do
-      create_new_app "App", Lego::Controller
-      @instance = Lego::Controller::ActionContext.new
-      @env = []
-    end
-
-    it 'should wrap the response' do
-      Lego::Controller.use StupidMiddleware
-      route = { :action_block => Proc.new{ options(:foo) }}
-      @instance.run([route, @env, {}]).should eql([200, {
-        'Content-Type'   => 'text/html',
-        'Content-Length' => '27' 
-      } , "Stupid... bar ...Middleware" ])
-    end
-
-    after do
-      Lego::Controller::ActionContext.middlewares.clear
-      rm_const "App"
-    end
-  end
 end
 

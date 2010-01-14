@@ -23,6 +23,16 @@ class Lego::Controller
 
       subclass.const_set(:RouteHandler,  Module.new { extend Lego::Controller::RouteHandler })
       subclass.const_set(:Config,        Module.new { extend Lego::Controller::Config       })
+
+      subclass.instance_eval do
+        def middlewares
+          @middlewares ||= ([] << Lego::Controller.middlewares).flatten
+        end
+      end
+    end
+
+    def middlewares
+      @middlewares ||= []
     end
 
     # 
@@ -116,7 +126,7 @@ class Lego::Controller
     #
 
     def use(middleware)
-      self::ActionContext.middlewares.unshift middleware
+      self.middlewares.unshift middleware
     end
 
     #
@@ -127,17 +137,27 @@ class Lego::Controller
     #
 
     def call(env)
-      if match_data = self::RouteHandler.match_all_routes(env)
-        self::ActionContext.new.run(match_data)
-      else
-        if route = self::RouteHandler.routes[:not_found]
-          self::ActionContext.new.run([route, env, { :set_response_code => 404 }])
+      app = lambda do |env|
+        if match_data = self::RouteHandler.match_all_routes(env)
+          self::ActionContext.new.run(match_data)
         else
-          [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
+          if route = self::RouteHandler.routes[:not_found]
+            self::ActionContext.new.run([route, env, { :set_response_code => 404 }])
+          else
+            [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
+          end
         end
       end
+
+      middleware_chain_for(app).call(env)
     end
 
+    def middleware_chain_for(app)
+      middlewares.each do |middleware|
+        app = middleware.new(app)
+      end
+      app
+    end
   end
 
   #

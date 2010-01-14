@@ -255,23 +255,34 @@ describe Lego::Controller do
       class Middleware1;end
       class Middleware2;end
 
-      Controller = Lego::Controller.dup
-      Controller::ActionContext.middlewares.clear
+      Lego::Controller.middlewares.clear
     end
 
     it "should add the middleware to the current contexts middlewares collection" do
-      Controller.use Middleware1
-      Controller::ActionContext.middlewares.should eql([Middleware1])
+      Lego::Controller.use Middleware1
+      Lego::Controller.middlewares.should eql([Middleware1])
     end
 
     it "should add the middlewares in the reverse order" do
-      Controller.use Middleware1
-      Controller.use Middleware2
-      Controller::ActionContext.middlewares.should eql([Middleware2, Middleware1])
+      Lego::Controller.use Middleware1
+      Lego::Controller.use Middleware2
+      Lego::Controller.middlewares.should eql([Middleware2, Middleware1])
     end
 
     after do
+      Lego::Controller.middlewares.clear
       rm_const "Middleware1", "Middleware2", "Controller"
+    end
+  end
+
+  context ".middlewares reader method" do
+
+    before do
+      Lego::Controller.middlewares.clear
+    end
+
+    it "should return an empty array when no middlewares are used" do
+      Lego::Controller.middlewares.should eql([])
     end
   end
 end
