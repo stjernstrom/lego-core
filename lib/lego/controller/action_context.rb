@@ -5,6 +5,14 @@ class Lego::Controller::ActionContext
 
   attr_accessor :response, :env, :route, :match_data
 
+  def self.inherited(subclass)
+    subclass.instance_eval do
+      def self.middlewares
+        @middlewares ||= ([] << Lego::Controller::ActionContext.middlewares).flatten
+      end
+    end
+  end
+
   def self.middlewares
     @middlewares ||= []
   end
