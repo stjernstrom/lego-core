@@ -103,5 +103,27 @@ describe Lego::Controller::ActionContext do
       rm_const "ActionContext"
     end
   end
+
+  context ".use <middleware>" do
+    before do
+      create_new_app "App", Lego::Controller
+      @instance = Lego::Controller::ActionContext.new
+      @env = []
+    end
+
+    it 'should wrap the response' do
+      Lego::Controller.use StupidMiddleware
+      route = { :action_block => Proc.new{ options(:foo) }}
+      @instance.run([route, @env, {}]).should eql([200, {
+        'Content-Type'   => 'text/html',
+        'Content-Length' => '27' 
+      } , "Stupid... bar ...Middleware" ])
+    end
+
+    after do
+      Lego::Controller::ActionContext.middlewares.clear
+      rm_const "App"
+    end
+  end
 end
 

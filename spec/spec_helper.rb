@@ -40,3 +40,20 @@ def reset_lego_base
   load 'lib/lego/controller/action_context.rb'
   load 'lib/lego/controller/config.rb'
 end
+
+class StupidMiddleware
+  def initialize(app, options = {})
+    @app = app
+  end
+
+  def call(env)         
+    status, headers, body = @app.call(env)
+    new_body = "Stupid... "
+    body.each { |str| new_body << str }
+    new_body << " ...Middleware"    
+   
+    headers['Content-Length'] = new_body.length.to_s
+
+    [status, headers, new_body]     
+  end
+end
