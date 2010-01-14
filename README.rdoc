@@ -11,6 +11,7 @@ It's all about the bits an pieces!
 - Write a text that describe what we are trying to do, and why :)
 - Write a roadmap for lego-core
 - Add before and after filter handling.
+- Implement Rack::Request & Rack::Response
 
 == Example plugin (plugin.rb)
 
@@ -96,6 +97,7 @@ It's all about the bits an pieces!
 - Add a plugin Context for before and after filters to make them pluggable?
 - Make the whole framework run inside an instance instead of as class methods?
 - When route is matchen with a different method than the one requested you should not respond 404, support for this?
+- Do we need core business to handle layouts for templates?
 
 == Note on Patches/Pull Requests
 
