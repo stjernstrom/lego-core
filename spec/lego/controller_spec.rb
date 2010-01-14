@@ -295,5 +295,30 @@ describe Lego::Controller do
       end
     end
   end
+
+  context ".use <middleware>" do
+    before do
+      class Middleware1;end
+      class Middleware2;end
+
+      Controller = Lego::Controller.dup
+      Controller::ActionContext.middlewares.clear
+    end
+
+    it "should add the middleware to the current contexts middlewares collection" do
+      Controller.use Middleware1
+      Controller::ActionContext.middlewares.should eql([Middleware1])
+    end
+
+    it "should add the middlewares in the reverse order" do
+      Controller.use Middleware1
+      Controller.use Middleware2
+      Controller::ActionContext.middlewares.should eql([Middleware2, Middleware1])
+    end
+
+    after do
+      rm_const "Middleware1", "Middleware2", "Controller"
+    end
+  end
 end
 

@@ -19,12 +19,26 @@ class Lego::Controller::ActionContext
 
   def run(match_data)
     @route, @env, @match_data = match_data
-    setup_instance_vars_from_route
-    evaluate_action
-    [@response[:code], @response[:headers], @response[:body]]
+    middleware_chain_for(application).call(@env)
   end
 
 private
+
+  def application
+    lambda do |env|
+      setup_instance_vars_from_route
+      evaluate_action
+      [@response[:code], @response[:headers], @response[:body]]
+    end
+  end
+
+  def middleware_chain_for(app)
+    (self.class).middlewares.each do |middleware|
+      app = middleware.new(app)
+    end
+
+    app
+  end
 
   #
   # setup_instance_vars_from_route extracts variables found in route[:instance_vars] thats setup by the route matchers
