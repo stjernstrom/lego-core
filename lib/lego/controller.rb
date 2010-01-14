@@ -112,6 +112,14 @@ class Lego::Controller
     end
 
     #
+    # Let's your applications use rack middlewares
+    #
+
+    def use(middleware)
+      self::ActionContext.middlewares.unshift middleware
+    end
+
+    #
     # Use environment to define environment specific configuration options 
     #
     # Usage:

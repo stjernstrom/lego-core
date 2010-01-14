@@ -89,5 +89,19 @@ describe Lego::Controller::ActionContext do
     end
   end
 
+  context ".middlewares reader method" do
+
+    before do
+      ActionContext = Lego::Controller::ActionContext.dup
+    end
+
+    it "should return an empty array when no middlewares are used" do
+      ActionContext.middlewares.should eql([])
+    end
+
+    after do
+      rm_const "ActionContext"
+    end
+  end
 end
 
