@@ -16,13 +16,13 @@ class Lego::Controller
     # and it will also create a new Lego::Controller::RouteHandler module for the class thats inheriting. 
     #
 
-    def inherited(class_inheriting)
-      class_inheriting.const_set(:ActionContext, Class.new(Lego::Controller::ActionContext) do
-        const_set :ApplicationClass, class_inheriting
-      end)
+    def inherited(subclass)
+      subclass.const_set :ActionContext, Class.new(Lego::Controller::ActionContext) {
+        const_set :ApplicationClass, subclass
+      }
 
-      class_inheriting.const_set(:RouteHandler,  Module.new { extend Lego::Controller::RouteHandler })
-      class_inheriting.const_set(:Config,        Module.new { extend Lego::Controller::Config })
+      subclass.const_set(:RouteHandler,  Module.new { extend Lego::Controller::RouteHandler })
+      subclass.const_set(:Config,        Module.new { extend Lego::Controller::Config       })
     end
 
     # 
