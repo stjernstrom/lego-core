@@ -15,7 +15,7 @@ class Lego::Controller::ActionContext
 
   def run(match_data)
     @route, @env, @match_data = match_data
-    setup_instance_vars_from_route
+    setup_instance_vars
     evaluate_action
     [@response[:code], @response[:headers], @response[:body]]
   end
@@ -27,7 +27,7 @@ private
   # and converts them to instance variables which makes them availible to the ActionContext.
   #
 
-  def setup_instance_vars_from_route
+  def setup_instance_vars
     @match_data[:instance_vars].each_key do |var|
       instance_variable_set("@#{var}", @match_data[:instance_vars][var])
     end if @match_data[:instance_vars]

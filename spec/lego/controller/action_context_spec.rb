@@ -71,5 +71,23 @@ describe Lego::Controller::ActionContext do
     end
   end
 
+  context 'setting up vars from match_data' do
+    before do
+      @inst = Lego::Controller::ActionContext.new
+      @hash_var = { :fly => "away", :go => "home" }
+      @match_data = [{}, {}, { :instance_vars => { :foo => "bar", :params => @hash_var } } ]
+    end
+    
+    it 'should setup @foo instance variable' do
+      @inst.run(@match_data)
+      @inst.instance_variable_get(:@foo).should eql("bar")
+    end
+
+    it 'should setup @params instance variable hash' do
+      @inst.run(@match_data)
+      @inst.instance_variable_get(:@params).should eql( @hash_var )
+    end
+  end
+
 end
 
