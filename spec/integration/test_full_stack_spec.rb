@@ -104,23 +104,6 @@ describe 'Full stack request' do
         end
       end
 
-      class StupidMiddleware
-        def initialize(app, options = {})
-          @app = app
-        end
-
-        def call(env)         
-          status, headers, body = @app.call(env)
-          new_body = "Stupid... "
-          body.each { |str| new_body << str }
-          new_body << " ...Middleware"    
-         
-          headers['Content-Length'] = new_body.length.to_s
-
-          [status, headers, new_body]     
-        end
-      end
-
       Lego.plugin GlobalPlugin
 
       class App1 < Lego::Controller
@@ -183,23 +166,6 @@ describe 'Full stack request' do
             match_data = { :instance_vars => { :foo => "bar" }}
             (route[:path] == env['PATH_INFO']) ? [env, match_data] : false
           end
-        end
-      end
-
-      class StupidMiddleware
-        def initialize(app, options = {})
-          @app = app
-        end
-
-        def call(env)         
-          status, headers, body = @app.call(env)
-          new_body = "Stupid... "
-          body.each { |str| new_body << str }
-          new_body << " ...Middleware"    
-         
-          headers['Content-Length'] = new_body.length.to_s
-
-          [status, headers, new_body]     
         end
       end
 
