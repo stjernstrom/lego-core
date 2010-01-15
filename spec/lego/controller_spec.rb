@@ -168,6 +168,7 @@ describe Lego::Controller do
         @match_data = [:foo => "bar"]
         @match_route = [:route => "route"]
         create_new_app("MyApp", Lego::Controller)
+        Lego::Controller.middlewares.clear
         MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return([@match_route, @env, @match_data])
       end
 
@@ -188,6 +189,7 @@ describe Lego::Controller do
         @env = []
         @block = lambda { "404, gone." } 
         create_new_app("MyApp", Lego::Controller)
+        Lego::Controller.middlewares.clear
         MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
         MyApp::RouteHandler.should_receive('routes').and_return({:not_found => { :action_block => @block }})
       end
@@ -207,6 +209,7 @@ describe Lego::Controller do
       before do
         @env = ["Environment"]
         create_new_app("MyApp", Lego::Controller)
+        Lego::Controller.middlewares.clear
         MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
       end
 

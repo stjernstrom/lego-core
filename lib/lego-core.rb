@@ -2,6 +2,8 @@
 #:title:Lego-Core
 #
 
+require 'rack'
+
 module Lego
 
   file_path = File.expand_path( File.dirname(__FILE__) )

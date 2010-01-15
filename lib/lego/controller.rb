@@ -29,6 +29,8 @@ class Lego::Controller
           @middlewares ||= ([] << Lego::Controller.middlewares).flatten
         end
       end
+
+      use    Rack::MethodOverride unless Config.options(:disable_method_override)
     end
 
     def middlewares

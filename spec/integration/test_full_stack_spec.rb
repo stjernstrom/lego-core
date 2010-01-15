@@ -5,6 +5,7 @@ describe 'Full stack request' do
   context 'with no routes specified' do
     before do
       reset_lego_base
+      Lego::Controller.middlewares.clear
       class MyApp < Lego::Controller; end
       rack_env = {
       'PATH_INFO' => '/' ,
@@ -28,6 +29,7 @@ describe 'Full stack request' do
     before do
 
       reset_lego_base
+      Lego::Controller.middlewares.clear
 
       module GlobalPlugin
         def self.register(lego)
@@ -150,6 +152,7 @@ describe 'Full stack request' do
     before do
 
       reset_lego_base
+      Lego.set :disable_method_override => true
 
       module GlobalPlugin
         def self.register(lego)
@@ -211,6 +214,37 @@ describe 'Full stack request' do
       App1.middlewares.clear
       App2.middlewares.clear
       rm_const 'App1', 'App2'
+    end
+  end
+
+  context 'Rack::MethodOverride' do
+    before do
+
+      reset_lego_base
+      @rack_env = {
+        'PATH_INFO'      => '/hello' ,
+        'REQUEST_METHOD' => 'POST',
+        'rack.input'     => StringIO.new("_method=put")
+      }
+    end
+
+    it 'should be loaded by default' do
+      class App < Lego::Controller; end
+      app = App.call(@rack_env)
+      @rack_env['REQUEST_METHOD'].should eql('PUT')
+    end
+
+    it "should be possible to opt it out" do
+      Lego.set :disable_method_override => true
+      class App < Lego::Controller; end
+      app = App.call(@rack_env)
+      @rack_env['REQUEST_METHOD'].should eql('POST')
+    end
+
+    after do
+      Lego::Controller.middlewares.clear
+      App.middlewares.clear
+      rm_const 'App'
     end
   end
 end
