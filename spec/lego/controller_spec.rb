@@ -278,6 +278,47 @@ describe Lego::Controller do
     end
   end
 
+  context "Rack::MethodOverride" do
+    before do
+      class Middleware1;end
+
+      Lego::Controller.middlewares.clear
+    end
+
+    it "should be loaded by default" do
+      create_new_app "App", Lego::Controller
+      Lego::Controller.middlewares.should eql([Rack::MethodOverride])
+    end
+
+    it "should play nice with manually loaded middlewares" do
+      create_new_app "App", Lego::Controller
+      Lego::Controller.use Middleware1
+      Lego::Controller.middlewares.should eql([Middleware1, Rack::MethodOverride])
+    end
+
+    it "should not be loaded when explicitly opt'ed out" do
+      Lego.set :disable_method_override => true
+      create_new_app "App", Lego::Controller
+      Lego::Controller.middlewares.should eql([])
+    end
+
+    it "should rewrite the request method of env" do
+      create_new_app "App", Lego::Controller
+      rack_env = {
+      'PATH_INFO' => '/hello' ,
+      'REQUEST_METHOD' => 'POST',
+      'rack.input'     => StringIO.new("_method=put")
+      }
+      App.call(rack_env)
+      rack_env['REQUEST_METHOD'].should eql('PUT')
+    end
+
+    after do
+      Lego::Controller.current_config.config.clear
+      Lego::Controller.middlewares.clear
+      rm_const "Middleware1", "App"
+    end
+  end
   context ".middlewares reader method" do
 
     before do
