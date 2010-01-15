@@ -30,7 +30,7 @@ class Lego::Controller
         end
       end
 
-      use    Rack::MethodOverride unless Config.options(:disable_method_override)
+      use Rack::MethodOverride unless Config.options(:disable_method_override)
     end
 
     def middlewares
