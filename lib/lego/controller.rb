@@ -9,157 +9,155 @@ class Lego::Controller
   autoload :RouteHandler,  'lego/controller/route_handler'
   autoload :Config,        'lego/controller/config'
 
-  class << self
 
-    #
-    # When Lego::Controller is inherited it will create a new Lego::Controller::ActionContext for the class thats inheriting
-    # and it will also create a new Lego::Controller::RouteHandler module for the class thats inheriting. 
-    #
+  #
+  # When Lego::Controller is inherited it will create a new Lego::Controller::ActionContext for the class thats inheriting
+  # and it will also create a new Lego::Controller::RouteHandler module for the class thats inheriting. 
+  #
 
-    def inherited(subclass)
-      subclass.const_set :ActionContext, Class.new(Lego::Controller::ActionContext) {
-        const_set :ApplicationClass, subclass
-      }
+  def self.inherited(subclass)
+    subclass.const_set :ActionContext, Class.new(Lego::Controller::ActionContext) {
+      const_set :ApplicationClass, subclass
+    }
 
-      subclass.const_set(:RouteHandler,  Module.new { extend Lego::Controller::RouteHandler })
-      subclass.const_set(:Config,        Module.new { extend Lego::Controller::Config       })
+    subclass.const_set(:RouteHandler,  Module.new { extend Lego::Controller::RouteHandler })
+    subclass.const_set(:Config,        Module.new { extend Lego::Controller::Config       })
 
-      subclass.instance_eval do
-        def middlewares
-          @middlewares ||= ([] << Lego::Controller.middlewares).flatten
-        end
-      end
-
-      use Rack::MethodOverride unless Config.options(:disable_method_override)
-    end
-
-    def middlewares
-      @middlewares ||= []
-    end
-
-    # 
-    # Use register inside your plugin to inject your code into the right place.
-    #
-    # Context available are:
-    #
-    # - :controller
-    # - :router
-    # - :view
-    #
-    # and on the way
-    #
-    # - :helper ?
-    #
-
-    def add_plugin(context, plugin_module)
-
-      base = (self == Lego::Controller) ? Lego::Controller : self 
-
-      case context
-      when :controller
-        base.extend plugin_module
-      when :router
-        base::RouteHandler.add_matcher plugin_module 
-      when :view
-        base::ActionContext.instance_eval do
-          include plugin_module
-        end
+    subclass.instance_eval do
+      def middlewares
+        @middlewares ||= ([] << Lego::Controller.middlewares).flatten
       end
     end
 
-    # 
-    # add_route <method> <route> is exposed to your plugin as a shortcut for adding routes to the application they are plugged in to.
-    # 
-    # <method> is a symbol for the request method it should match
-    # 
-    # Valid options are:
-    #
-    # - :get
-    # - :post
-    # - :put
-    # - :head
-    # - :options
-    # - :not_found
-    #
-    # <route> is a hash with keys to be handled by the route matchers and also the ActionContext
-    #
-    # Valid options are anything your route matcher can handle. But there's some keys that's special for Lego and they are.
-    #
-    # - :action_block      => A block thats going to be executed inside ActionContext.
-    # - :instance_vars     => A hash where the keys beeing converted to ActionContext vars ex: { :var1 => "value1", :var2 => "value2" } 
-    # - :set_response_code => An integer representing the response code.
-    #
+    use Rack::MethodOverride unless Config.options(:disable_method_override)
+  end
 
-    def add_route(method, route)
-      self::RouteHandler.add_route(method, route)
+  def self.middlewares
+    @middlewares ||= []
+  end
+
+  # 
+  # Use register inside your plugin to inject your code into the right place.
+  #
+  # Context available are:
+  #
+  # - :controller
+  # - :router
+  # - :view
+  #
+  # and on the way
+  #
+  # - :helper ?
+  #
+
+  def self.add_plugin(context, plugin_module)
+
+    base = (self == Lego::Controller) ? Lego::Controller : self 
+
+    case context
+    when :controller
+      base.extend plugin_module
+    when :router
+      base::RouteHandler.add_matcher plugin_module 
+    when :view
+      base::ActionContext.instance_eval do
+        include plugin_module
+      end
     end
+  end
 
-    #
-    # Use plugin in your controllers to choose which extensions you want to use in this controller. 
-    #
-    # Extensions then inject themself into the right context.
-    #
+  # 
+  # add_route <method> <route> is exposed to your plugin as a shortcut for adding routes to the application they are plugged in to.
+  # 
+  # <method> is a symbol for the request method it should match
+  # 
+  # Valid options are:
+  #
+  # - :get
+  # - :post
+  # - :put
+  # - :head
+  # - :options
+  # - :not_found
+  #
+  # <route> is a hash with keys to be handled by the route matchers and also the ActionContext
+  #
+  # Valid options are anything your route matcher can handle. But there's some keys that's special for Lego and they are.
+  #
+  # - :action_block      => A block thats going to be executed inside ActionContext.
+  # - :instance_vars     => A hash where the keys beeing converted to ActionContext vars ex: { :var1 => "value1", :var2 => "value2" } 
+  # - :set_response_code => An integer representing the response code.
+  #
 
-    def plugin(plugin_module)
-      plugin_module.register(self)
-    end
+  def self.add_route(method, route)
+    self::RouteHandler.add_route(method, route)
+  end
 
-    #
-    # Provides acces to the current Config class
-    #
+  #
+  # Use plugin in your controllers to choose which extensions you want to use in this controller. 
+  #
+  # Extensions then inject themself into the right context.
+  #
 
-    def current_config
-      self::Config
-    end
+  def self.plugin(plugin_module)
+    plugin_module.register(self)
+  end
 
-    #
-    # Use set to define environment agnostic configuration options
-    #
-    # Usage:
-    #   Lego::Controller.set :foo => "bar"
-    #
+  #
+  # Provides acces to the current Config class
+  #
 
-    def set(options={})
-      current_config.set(options)
-    end
+  def self.current_config
+    self::Config
+  end
 
-    #
-    # Let's your applications use rack middlewares
-    #
+  #
+  # Use set to define environment agnostic configuration options
+  #
+  # Usage:
+  #   Lego::Controller.set :foo => "bar"
+  #
 
-    def use(middleware)
-      self.middlewares.unshift middleware
-    end
+  def self.set(options={})
+    current_config.set(options)
+  end
 
-    #
-    # call is used to handle an incomming Rack request. 
-    #
-    # If no matching route is found we check for a defined :not_found route
-    # and if no :not_found defined we send a simple 404 - not found.
-    #
+  #
+  # Let's your applications use rack middlewares
+  #
 
-    def call(env)
-      app = lambda do |env|
-        if match_data = self::RouteHandler.match_all_routes(env)
-          self::ActionContext.new.run(match_data)
+  def self.use(middleware)
+    self.middlewares.unshift middleware
+  end
+
+  #
+  # call is used to handle an incomming Rack request. 
+  #
+  # If no matching route is found we check for a defined :not_found route
+  # and if no :not_found defined we send a simple 404 - not found.
+  #
+
+  def self.call(env)
+    app = lambda do |env|
+      if match_data = self::RouteHandler.match_all_routes(env)
+        self::ActionContext.new.run(match_data)
+      else
+        if route = self::RouteHandler.routes[:not_found]
+          self::ActionContext.new.run([route, env, { :set_response_code => 404 }])
         else
-          if route = self::RouteHandler.routes[:not_found]
-            self::ActionContext.new.run([route, env, { :set_response_code => 404 }])
-          else
-            [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
-          end
+          [404, {'Content-Type' => 'text/html'}, '404 - Not found'] 
         end
       end
-
-      middleware_chain_for(app).call(env)
     end
 
-    def middleware_chain_for(app)
-      middlewares.each do |middleware|
-        app = middleware.new(app)
-      end
-      app
+    middleware_chain_for(app).call(env)
+  end
+
+  def self.middleware_chain_for(app)
+    middlewares.each do |middleware|
+      app = middleware.new(app)
     end
+    app
   end
 
   #
