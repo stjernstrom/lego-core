@@ -51,19 +51,7 @@ class Lego::Controller
   #
 
   def self.add_plugin(context, plugin_module)
-
-    base = (self == Lego::Controller) ? Lego::Controller : self 
-
-    case context
-    when :controller
-      base.extend plugin_module
-    when :router
-      base::RouteHandler.add_matcher plugin_module 
-    when :view
-      base::ActionContext.instance_eval do
-        include plugin_module
-      end
-    end
+    send(context, plugin_module)
   end
 
   # 
@@ -130,6 +118,13 @@ class Lego::Controller
     self.middlewares.unshift middleware
   end
 
+  def self.middleware_chain_for(app)
+    middlewares.each do |middleware|
+      app = middleware.new(app)
+    end
+    app
+  end
+
   #
   # call is used to handle an incomming Rack request. 
   #
@@ -152,18 +147,26 @@ class Lego::Controller
 
     middleware_chain_for(app).call(env)
   end
+  
 
-  def self.middleware_chain_for(app)
-    middlewares.each do |middleware|
-      app = middleware.new(app)
+  private
+
+    def self.controller(plugin_module)
+      self.extend plugin_module
     end
-    app
-  end
+
+    def self.router(plugin_module)
+      self::RouteHandler.add_matcher plugin_module 
+    end
+
+    def self.view(plugin_module)
+      self::ActionContext.send :include, plugin_module
+    end
+
 
   #
   # Core plugins
   #
 
   plugin Lego::Plugin::Controller::NotFound
-
 end
