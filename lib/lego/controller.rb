@@ -3,28 +3,44 @@ class Lego::Controller
     @controller ||= self.new
   end
 
-  ######
-  # TODO: 
-  # 
-  # Replace this by explicitly defining class-level proxy methods
-  # there's really no need to do this dynamically
-  def self.method_added(name)
-    metaclass = class << self; self; end
-    metaclass.send :define_method, name do |*args, &block|
-      controller_instance.send(name, *args, &block) 
-    end
-  end
-
   def self.inherited(subclass)
     subclass.const_set(:Context, Class.new(Context))
   end
 
+  def self.plugin(mod)
+    controller_instance.plugin(mod)
+  end
+
+  def self.register_plugin(type, mod)
+    controller_instance.register_plugin(type, mod)
+  end
+
+  def self.call(env)
+    controller_instance.call(env)
+  end
+
+  def self.routes
+    controller_instance.routes
+  end
+
+  def self.context
+    controller_instance.context
+  end
+
   attr_reader :routes, :context
 
+  def current_context
+    self.class::Context
+  end
+
+  def current_routes
+    self.class::Routes
+  end
+
   def initialize
-    @routes = Routes.new
+    @routes = current_routes.new
     unless self.class == Lego::Controller
-      @routes.matchers << Lego::Controller.controller_instance.routes.matchers.flatten
+      @routes.matchers << Lego::Controller.controller_instance.routes.matchers
       @routes.matchers.flatten!
     end
   end
@@ -42,7 +58,7 @@ class Lego::Controller
     path = env["PATH_INFO"]
 
     if action = routes.get(verb, path)
-      @context = Context.new
+      @context = current_context.new
       @context.finish(env, &action)
     else
       route_not_found
@@ -60,8 +76,8 @@ class Lego::Controller
       routes.matchers << mod
     end
 
-    def helper(mod)
-      Context.send :include, mod
+    def view(mod)
+      current_context.send :include, mod
     end
 
     def route_not_found

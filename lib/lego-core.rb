@@ -1,3 +1,4 @@
+$LOAD_PATH.unshift File.join(Dir.pwd, 'lib')
 require 'rack'
 
 module Lego
