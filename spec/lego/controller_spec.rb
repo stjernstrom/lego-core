@@ -1,333 +1,245 @@
-require File.join('spec', '/spec_helper')
+require File.join(Dir.pwd, 'spec', 'spec_helper')
 
-describe Lego::Controller do
+context "LegoController" do
 
-  it 'should contain an ActionContext Class' do
-    Lego::Controller::ActionContext.should be_kind_of(Class)
+  it "should set up a unique instance of self for subclasses" do
+    app1 = Class.new(Lego::Controller)
+    app2 = Class.new(Lego::Controller)
+    app1.controller_instance.should_not eql(app2.controller_instance)
   end
 
-  it 'should contain an RouteHandler Module' do
-    Lego::Controller::RouteHandler.should be_kind_of(Module)
-  end
+  context "When a method is added" do
 
-    it 'should load Lego::Plugin::Controller::NotFound by default' do
-      Lego::Controller.methods.should include('not_found')
+    it "should add a class level proxy method" do
+      Lego::Controller.class_eval { def foo; "foo"; end }
+      Lego::Controller.foo.should eql("foo")
     end
 
-  context 'when inherited' do
-    before do
-      create_new_app("MyController", Lego::Controller)
-    end
-
-    it 'should create a new ActionContext for the inheriting class' do
-      MyController::ActionContext.object_id.should_not == Lego::Controller::ActionContext.object_id
-    end
-
-    it 'should setup a constant on ActionContext holding a reference to the application class' do
-      MyController::ActionContext::ApplicationClass.should eql(MyController)
-    end
-
-    it 'should create a new RouteHandler for the inheriting class' do
-      MyController::RouteHandler.object_id.should_not == Lego::Controller::RouteHandler.object_id
-    end
-
-    it 'should create a new Config for the inheriting class' do
-      MyController::Config.object_id.should_not == Lego::Controller::Config.object_id
-    end
-
-    it 'should create a new Config for every inheriting class' do
-      create_new_app "MyOtherController", Lego::Controller
-      MyController::Config.object_id.should_not == MyOtherController::Config.object_id
-    end
-  end
-
-  context '.plugin <plugin_module>' do
-    before do
-      create_new_app("MyApp", Lego::Controller)
-      module MyPlugin
-        def self.register(lego)
-          lego.register self
+    it "should add a class level proxy with args" do
+      Lego::Controller.class_eval do
+        def foo(bar, baz)
+          "#{bar} - #{baz}"
         end
+      end
+
+      Lego::Controller.foo("bar", "baz").should eql("bar - baz")
+    end
+
+    it "should add a class level proxy with a block" do
+      Lego::Controller.class_eval do
+        def foo(&block)
+          "#{block.call}"
+        end
+      end
+
+      Lego::Controller.foo { "foobar"  }.should eql("foobar")
+    end
+
+    it "should add a class level proxy with arbitrary args and a block" do
+      Lego::Controller.class_eval do
+        def foo(*args, &block)
+          "#{args.inspect} - #{block.call}"
+        end
+      end
+           
+      Lego::Controller.foo("foo", "bar") { 
+        "foobar"  
+      }.should eql("[\"foo\", \"bar\"] - foobar")
+    end
+
+    it "should make controller methods available to subclasses as well" do
+      Lego::Controller.class_eval do
+        def foobar
+          "foo"
+        end
+      end
+      app1 = Class.new(Lego::Controller)
+      app2 = Class.new(Lego::Controller)
+      
+      app1.foobar.should eql("foo")
+      app2.foobar.should eql("foo")
+    end
+
+    it "should not share methods between subclasses" do
+      app1 = Class.new(Lego::Controller)
+      app2 = Class.new(Lego::Controller)
+      app1.class_eval { def foobar;"app1";end }
+      app2.class_eval { def foobar;"app2";end }
+      
+      app1.foobar.should_not eql(app2.foobar)
+    end
+  end
+
+  context ".routes" do
+    
+    context "instance level" do
+      it "should return a routes instance" do
+        app = Class.new(Lego::Controller)
+        app.controller_instance.routes.is_a?(Lego::Controller::Routes).should eql(true)
+      end
+
+      it "should be unique to Lego::Controller subclasses" do
+        app1 = Class.new(Lego::Controller)
+        app2 = Class.new(Lego::Controller)
+
+        app1.controller_instance.routes.should_not eql(app2.controller_instance.routes)
+      end
+
+    end
+
+    context "class level" do
+      it "should return a routes instance" do
+        app = Class.new(Lego::Controller)
+        app.routes.is_a?(Lego::Controller::Routes).should eql(true)
       end
     end
 
-    after do
-      rm_const "MyPlugin", "MyApp"
-    end
+    context "matchers" do
+      let(:matcher)    { Module.new                  }
+      let(:controller) { Lego::Controller            }
+      let(:app1)       { Class.new(Lego::Controller) }
+      let(:app2)       { Class.new(Lego::Controller) }
 
-    it 'should have a class method named plugin' do
-      MyApp.should respond_to(:plugin)
-    end
-
-    it 'should call self.register on <plugin_module>' do
-      MyPlugin.should_receive(:register).with(MyApp)
-      MyApp.plugin MyPlugin
-    end
-  end
-
-  context '.add_plugin :view, <plugin_module>' do
-    before do
-      create_new_app("MyApp", Lego::Controller)
-      module MyViewPlugin
-        def self.register(lego)
-          lego.add_plugin :view, self
-        end
-        def makebold(content)
-          "<b>#{content}</b>"
-        end
-      end
-    end
-
-    it 'should make plugin methods availibe to ActionContext' do
-      MyApp::ActionContext.instance_methods.should_not include('makebold')
-      MyApp.plugin MyViewPlugin
-      MyApp::ActionContext.instance_methods.should include('makebold')
-    end
-
-    after do
-      rm_const "MyViewPlugin", "MyApp"
-    end
-  end
-
-  context '.add_plugin :controller, <plugin_module>' do
-    before do
-      create_new_app("MyApp", Lego::Controller)
-      module MyPlugin2
-        def self.register(lego)
-          lego.add_plugin :controller, PluginMethods
-        end
-        module PluginMethods
-          def get_this;end
-        end
-      end
-    end
-
-    after do
-      rm_const "MyPlugin2", "MyApp"
-    end
-
-    it 'should extend controller with <plugin_module>' do
-      MyApp.should_not respond_to(:get_this)
-      MyApp.plugin MyPlugin2
-      MyApp.should respond_to(:get_this)
-    end
-  end
-
-  context '.add_route <method> <route>' do
-    before do
-      create_new_app("MyApp", Lego::Controller)
-    end
-
-    it 'should be defined' do
-      MyApp.should respond_to(:add_route)
-    end
-
-    it 'should add a route to RouteHandler' do
-      route = {:path => '/somewhere'}
-      method = :get
-      MyApp::RouteHandler.should_receive(:add_route).with(method, route)
-      MyApp.add_route(method, route)
-    end
-    after { rm_const 'MyApp' }
-  end
-
-  context '.add_plugin :router, <plugin_module>' do
-    before do
-      create_new_app("MyApp", Lego::Controller)
-      module MyRouter
-        def self.register(lego)
-          lego.add_plugin :router, RouterMethods 
-        end
-        module RouterMethods
-          extend self
-          def match_route
-          end
-        end
-      end
-    end
-
-    after do
-      rm_const "MyRouter", "MyApp"
-    end
-
-    it 'should not extend controller with <plugin_module>' do
-      MyApp.plugin MyRouter
-      MyApp.should_not respond_to(:match_route)
-    end
-
-    it 'should call add_matcher on RouteHandler with <plugin_module>' do
-      MyApp::RouteHandler.should_receive(:add_matcher).with(MyRouter::RouterMethods)
-      MyApp.plugin MyRouter
-    end
-  end
-
-  context '.call <env>' do
-    context 'with a route that matches' do
       before do
-        @env = ["Environment"]
-        @match_data = [:foo => "bar"]
-        @match_route = [:route => "route"]
-        create_new_app("MyApp", Lego::Controller)
-        Lego::Controller.middlewares.clear
-        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return([@match_route, @env, @match_data])
+        controller.controller_instance.routes.matchers.clear
       end
 
-      it 'should create a new instance of ActionContext' do
-        mock = mock("ActionContext instance")
-        mock.should_receive(:run).with([@match_route, @env, @match_data])
-        MyApp::ActionContext.should_receive(:new).and_return(mock)
+      it "should inherit matchers from Lego::Controller" do
+        controller.controller_instance.routes.matchers << matcher
+        app1.new.routes.matchers.should eql([matcher])
       end
 
-      after do
-        MyApp.call(@env)
-        rm_const "MyApp"
+      it "should not share matchers between subclasses" do
+        app1.controller_instance.routes.matchers << matcher
+        app1_matchers = app1.controller_instance.routes.matchers
+        app1_matchers.should_not eql(app2.controller_instance.routes.matchers)
       end
     end
-
-    context 'without a route match and a not_found route defined' do
-      before do
-        @env = []
-        @block = lambda { "404, gone." } 
-        create_new_app("MyApp", Lego::Controller)
-        Lego::Controller.middlewares.clear
-        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
-        MyApp::RouteHandler.should_receive('routes').and_return({:not_found => { :action_block => @block }})
-      end
-
-      it 'should get a valid 404 response with the block data' do
-        MyApp.call(@env).should eql(
-          [404, {'Content-Type' => 'text/html'}, '404, gone.']
-        )
-      end
-
-      after do
-        rm_const "MyApp"
-      end
-    end
-
-    context 'with a route that don\'t matches' do
-      before do
-        @env = ["Environment"]
-        create_new_app("MyApp", Lego::Controller)
-        Lego::Controller.middlewares.clear
-        MyApp::RouteHandler.should_receive(:match_all_routes).with(@env).and_return(nil)
-      end
-
-      it 'should create a new instance of ActionContext' do
-        MyApp::ActionContext.should_not_receive(:new)
-      end
-
-      after do
-        MyApp.call(@env).should eql(
-          [404, {'Content-Type' => 'text/html'}, '404 - Not found']
-        )
-        rm_const "MyApp"
-      end
-    end
-
   end
 
-  context ".set" do
-    context 'on Lego::Controller' do
+  context ".call <env>" do
 
-      it "should proxy the method call to its own Config" do
-        Lego::Controller::Config.should_receive(:set).and_return(nil)
-        Lego::Controller.set :foo => "bar"
+    context "with defined routes" do
+      before do
+        Lego::Controller.routes.add :get, '/', &lambda { "root" }
+        @response = Lego::Controller.call({'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'})
+      end
+
+      it "should return a three element array" do
+        @response.length.should eql(3)
+      end
+
+      context "response" do
+        
+        it "should be a 200" do
+          @response[0].should eql(200)
+        end
+
+        it "should have a content type and length" do
+          @response[1].should eql({"Content-Type"=>"text/html", "Content-Length"=>"4"})
+        end
+
+        it "should have a body" do
+          @response[2].body.should eql(["root"])
+        end
       end
     end
 
-    context "on subclasses" do
+    context "without defined routes" do
+      before do
+        @response = Lego::Controller.call({'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/404'})
+      end
+
+      it "should return a three element array" do
+        @response.length.should eql(3)
+      end
+
+      context "response" do
+        
+        it "should be a 200" do
+          @response[0].should eql(404)
+        end
+
+        it "should have a content type and length" do
+          @response[1].should eql({'Content-Type'=>'text/html', 'Content-Length'=>'9'})
+        end
+
+        it "should have a body" do
+          @response[2].should eql(["Not Found"])
+        end
+      end
+    end
+  end
+
+  context "plugins" do
+
+    context "controller plugin" do
       
       before do
-        create_new_app "MyApp", Lego::Controller
+        plugin = Module.new do
+          def self.register(lego)
+            lego.register_plugin :controller, self
+          end
+
+          def get(path, &block)
+            routes.add :get, path, &block
+          end
+        end
+        @app = Class.new(Lego::Controller) 
+        @app.controller_instance.plugin plugin
       end
 
-      it "should proxy the method call to its own Confg" do
-        MyApp::Config.should_receive(:set).and_return(nil)
-        MyApp.set :foo => "bar"
+      it "should make plugin method accessible" do
+        @app.get("/", &lambda { "controller plugin" })
+
+        @app.call({
+          'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'
+        })[0].should eql(200)
+      end
+    end
+
+    context "helper plugin" do
+      
+      before do
+        helper_plugin = Module.new do
+          def self.register(lego)
+            lego.register_plugin :helper, self
+          end
+
+          def h(content)
+            Rack::Utils.escape(content)
+          end
+        end
+        controller_plugin = Module.new do
+          def self.register(lego)
+            lego.register_plugin :controller, self
+          end
+
+          def get(path, &block)
+            routes.add :get, path, &block
+          end
+        end
+        Lego::Controller.controller_instance.plugin controller_plugin
+        @app1 = Class.new(Lego::Controller) 
+        @app2 = Class.new(Lego::Controller)
+        @app1.plugin helper_plugin
       end
 
-      after do
-        rm_const "MyApp"
+      it "should make plugin method accessible" do
+        @app1.get("/", &lambda { h("<html>") })
+
+        @app1.call({
+          'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'
+        })[2].body.should eql(["%3Chtml%3E"])
       end
-    end
-  end
 
-  context ".use <middleware>" do
-    before do
-      class Middleware1;end
-      class Middleware2;end
+      it "should not share methods between subclasses" do
+        @app2.get("/", &lambda { h("<html>") })
 
-      Lego::Controller.middlewares.clear
-    end
-
-    it "should add the middleware to the current contexts middlewares collection" do
-      Lego::Controller.use Middleware1
-      Lego::Controller.middlewares.should eql([Middleware1])
-    end
-
-    it "should add the middlewares in the reverse order" do
-      Lego::Controller.use Middleware1
-      Lego::Controller.use Middleware2
-      Lego::Controller.middlewares.should eql([Middleware2, Middleware1])
-    end
-
-    after do
-      Lego::Controller.middlewares.clear
-      rm_const "Middleware1", "Middleware2", "Controller"
-    end
-  end
-
-  context "Rack::MethodOverride" do
-    before do
-      class Middleware1;end
-
-      Lego::Controller.middlewares.clear
-    end
-
-    it "should be loaded by default" do
-      create_new_app "App", Lego::Controller
-      Lego::Controller.middlewares.should eql([Rack::MethodOverride])
-    end
-
-    it "should play nice with manually loaded middlewares" do
-      create_new_app "App", Lego::Controller
-      Lego::Controller.use Middleware1
-      Lego::Controller.middlewares.should eql([Middleware1, Rack::MethodOverride])
-    end
-
-    it "should not be loaded when explicitly opt'ed out" do
-      Lego.set :disable_method_override => true
-      create_new_app "App", Lego::Controller
-      Lego::Controller.middlewares.should eql([])
-    end
-
-    it "should rewrite the request method of env" do
-      create_new_app "App", Lego::Controller
-      rack_env = {
-      'PATH_INFO' => '/hello' ,
-      'REQUEST_METHOD' => 'POST',
-      'rack.input'     => StringIO.new("_method=put")
-      }
-      App.call(rack_env)
-      rack_env['REQUEST_METHOD'].should eql('PUT')
-    end
-
-    after do
-      Lego::Controller.current_config.config.clear
-      Lego::Controller.middlewares.clear
-      rm_const "Middleware1", "App"
-    end
-  end
-  context ".middlewares reader method" do
-
-    before do
-      Lego::Controller.middlewares.clear
-    end
-
-    it "should return an empty array when no middlewares are used" do
-      Lego::Controller.middlewares.should eql([])
+        @app2.call({
+          'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'
+        })[2].body.should eql(["%3Chtml%3E"])
+      end
     end
   end
 end
-

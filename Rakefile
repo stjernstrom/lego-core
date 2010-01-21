@@ -1,63 +1,78 @@
+require 'rubygems'
 require 'rake'
-require 'rake/rdoctask'
-require 'rcov/rcovtask'
-
-
-begin
-  require 'spec/rake/spectask'
-rescue LoadError
-  puts 'To use rspec for testing you must install rspec gem:'
-  puts '$ sudo gem install rspec'
-  exit
-end
-
-desc "Default task is to run specs"
-task :default => :show_all_tasks
-
-desc "Run all examples with RCov"
-Spec::Rake::SpecTask.new('rcov') do |t|
-  t.spec_files = FileList['spec/**/*.rb']
-  t.spec_opts = ['--options', '"spec/spec.opts"']
-  # rcov
-  t.rcov = true
-  t.rcov_dir = 'doc/coverage'
-  t.rcov_opts = ['-p', '-T', '--exclude', 'spec']
-end
-
-desc "Run the specs under spec"
-Spec::Rake::SpecTask.new do |t|
-  t.spec_opts = ['--diff', '--options', "spec/spec.opts"]
-  t.spec_files = FileList['spec/**/*_spec.rb']
-end
-
-desc "Print Specdoc for all specs"
-Spec::Rake::SpecTask.new('specdoc') do |t|
-  t.spec_opts = ["--format", "specdoc", "--dry-run", "--options", 'spec/spec.opts']
-  t.spec_files = FileList['spec/**/*_spec.rb']
-end
-
-desc "Generate RDoc documentation"
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README.rdoc' << '--charset' << 'utf-8'
-  rdoc.rdoc_dir = "doc"
-  rdoc.rdoc_files.include 'README.rdoc'
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
 
 begin
   require 'jeweler'
-  Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "lego-core"
-    gemspec.summary = "It's all about the bits and peices"
-    gemspec.description = "It's all about the bits and peices"
-    gemspec.email = "mathias@globalinn.com"
-    gemspec.homepage = "http://github.com/stjernstrom/lego-core"
-    gemspec.authors = ["Mathias Stjernström", "Patrik Hedman"]
+  Jeweler::Tasks.new do |gem|
+    gem.name = "lego-core-draft"
+    gem.summary = %Q{TODO: one-line summary of your gem}
+    gem.description = %Q{TODO: longer description of your gem}
+    gem.email = "patrik@moresale.se"
+    gem.homepage = "http://github.com/polly/lego-core-draft"
+    gem.authors = ["Patrik Hedman"]
+    gem.add_development_dependency "bacon", ">= 0"
+    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
+  Jeweler::GemcutterTasks.new
 rescue LoadError
-  puts "Jeweler not available. Install it with: gem install jeweler"
+  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
-task :show_all_tasks do
-  system "rake -T"
+require 'rake/testtask'
+Rake::TestTask.new(:spec) do |spec|
+  spec.libs << 'lib' << 'spec'
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.verbose = true
+end
+
+begin
+  require 'rcov/rcovtask'
+  Rcov::RcovTask.new do |spec|
+    spec.libs << 'spec'
+    spec.pattern = 'spec/**/*_spec.rb'
+    spec.verbose = true
+  end
+rescue LoadError
+  task :rcov do
+    abort "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov"
+  end
+end
+
+task :spec => :check_dependencies
+
+begin
+  require 'reek/adapters/rake_task'
+  Reek::RakeTask.new do |t|
+    t.fail_on_error = true
+    t.verbose = false
+    t.source_files = 'lib/**/*.rb'
+  end
+rescue LoadError
+  task :reek do
+    abort "Reek is not available. In order to run reek, you must: sudo gem install reek"
+  end
+end
+
+begin
+  require 'roodi'
+  require 'roodi_task'
+  RoodiTask.new do |t|
+    t.verbose = false
+  end
+rescue LoadError
+  task :roodi do
+    abort "Roodi is not available. In order to run roodi, you must: sudo gem install roodi"
+  end
+end
+
+task :default => :spec
+
+require 'rake/rdoctask'
+Rake::RDocTask.new do |rdoc|
+  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = "lego-core-draft #{version}"
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
 end
