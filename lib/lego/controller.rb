@@ -3,6 +3,11 @@ class Lego::Controller
     @controller ||= self.new
   end
 
+  ######
+  # TODO: 
+  # 
+  # Replace this by explicitly defining class-level proxy methods
+  # there's really no need to do this dynamically
   def self.method_added(name)
     metaclass = class << self; self; end
     metaclass.send :define_method, name do |*args, &block|
