@@ -120,8 +120,17 @@ context "LegoController" do
   context ".call <env>" do
 
     context "with defined routes" do
+      let(:matcher) do 
+        Module.new do 
+          def self.match_route(routes, verb, path)
+            routes[verb][path]
+          end
+        end
+      end
+
       before do
-        Lego::Controller.routes.add :get, '/', &lambda { "root" }
+        Lego::Controller.controller_instance.routes.matchers << matcher
+        Lego::Controller.controller_instance.routes.add :get, '/', &lambda { "root" }
         @response = Lego::Controller.call({'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'})
       end
 
@@ -239,6 +248,51 @@ context "LegoController" do
         @app2.call({
           'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'
         })[2].body.should eql(["%3Chtml%3E"])
+      end
+    end
+
+    context "router plugin" do
+      
+      before do
+        Lego::Controller.controller_instance.routes.matchers.clear
+        router_plugin = Module.new do
+          def self.register(lego)
+            lego.register_plugin :router, self
+          end
+
+          def self.match_route(router, verb, path)
+            router[verb][path]
+          end
+        end
+        controller_plugin = Module.new do
+          def self.register(lego)
+            lego.register_plugin :controller, self
+          end
+
+          def get(path, &block)
+            routes.add :get, path, &block
+          end
+        end
+        Lego::Controller.controller_instance.plugin controller_plugin
+        @app1 = Class.new(Lego::Controller) 
+        @app2 = Class.new(Lego::Controller)
+        @app1.controller_instance.plugin router_plugin
+      end
+
+      it "should make plugin method accessible" do
+        @app1.get("/", &lambda { "router plugin" })
+
+        @app1.call({
+          'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'
+        })[2].body.should eql(["router plugin"])
+      end
+
+      it "should not share methods between subclasses" do
+        @app2.get("/", &lambda { "router plugin" })
+
+        @app2.call({
+          'REQUEST_METHOD'=>'GET', 'PATH_INFO'=>'/'
+        })[2].should eql(["Not Found"])
       end
     end
   end

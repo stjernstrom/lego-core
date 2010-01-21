@@ -6,6 +6,11 @@ context "Lego::Controller::Routes" do
 
     before do
       @routes = Lego::Controller::Routes.new
+      @routes.matchers << Module.new do
+        def self.match_route(routes, verb, path)
+          routes[verb][path]
+        end
+      end
       @routes.add(:get, "/", &lambda { "root path" })
     end
 

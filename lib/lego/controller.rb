@@ -56,6 +56,10 @@ class Lego::Controller
       self.class.extend mod
     end
 
+    def router(mod)
+      routes.matchers << mod
+    end
+
     def helper(mod)
       Context.send :include, mod
     end
