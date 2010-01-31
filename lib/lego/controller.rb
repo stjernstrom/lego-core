@@ -1,91 +1,70 @@
 class Lego::Controller
-  def self.controller_instance
+  proxy_methods :call, :use, :routes, :config, :set
+
+  def self.instance
     @controller ||= self.new
   end
 
   def self.inherited(subclass)
-    subclass.const_set(:Context, Class.new(Context))
+    subclass.inherit_constants(self)
+    subclass.load_globals(self)
   end
 
-  def self.plugin(mod)
-    controller_instance.plugin(mod)
+  def self.inherit_constants(parent)
+    self.const_set(:Context, Class.new(parent::Context))
+    self::Context.const_set(:CurrentClass, self)
   end
 
-  def self.register_plugin(type, mod)
-    controller_instance.register_plugin(type, mod)
+  def self.load_globals(parent)
+    self.routes.load_global_matchers(parent)
+    self.config.load_global_options(parent)
+    self.instance.extension_handler.load_global_middlewares(parent)
   end
+  
+  attr_reader :routes, :config
 
-  def self.call(env)
-    controller_instance.call(env)
-  end
-
-  def self.routes
-    controller_instance.routes
-  end
-
-  def self.context
-    controller_instance.context
-  end
-
-  attr_reader :routes, :context
-
-  def current_context
+  def context
     self.class::Context
   end
 
-  def current_routes
-    self.class::Routes
+  def extension_handler
+    @extension_handler ||= ::Lego::ExtensionHandler.new(self)
   end
 
   def initialize
-    @routes = current_routes.new
-    unless self.class == Lego::Controller
-      @routes.matchers << Lego::Controller.controller_instance.routes.matchers
-      @routes.matchers.flatten!
-    end
+    @routes = Routes.new
+    @config = ::Lego::Config.new
   end
 
-  def plugin(mod)
-    mod.register(self)
+  def use(plugin)
+    extension_handler.use(plugin)
   end
 
-  def register_plugin(type, mod)
-    send(type, mod)
+  def set(options)
+    config.set(options)
   end
 
   def call(env)
-    verb = env["REQUEST_METHOD"].downcase.to_sym
-    path = env["PATH_INFO"]
+    app = lambda do |env|
+      verb, path = extract_method_and_path(env)
 
-    if action = routes.get(verb, path)
-      @context = current_context.new
-      @context.finish(env, &action)
-    else
-      route_not_found
+      routes.match(verb, path) do |match|
+        @context = context.new
+        
+        if (matcher = match[:matcher]).respond_to? :prepare_context
+          matcher.prepare_context(@context) 
+        end
+
+        @context.finish(env, &match[:action])
+      end
     end
+    
+    extension_handler.middleware_chain_for(app).call(env)
   end
-
   
   private
 
-    def controller(mod)
-      self.class.extend mod
-    end
-
-    def router(mod)
-      routes.matchers << mod
-    end
-
-    def view(mod)
-      current_context.send :include, mod
-    end
-
-    def route_not_found
-      [
-        404, {
-          'Content-Type'   =>'text/html', 
-          'Content-Length' =>'9'
-        }, ["Not Found"]
-      ]
+    def extract_method_and_path(env)
+      [env["REQUEST_METHOD"].downcase.to_sym, env["PATH_INFO"]]
     end
 end

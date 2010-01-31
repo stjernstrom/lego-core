@@ -18,5 +18,9 @@ context "LegoCore" do
     it "should define Lego::Controller::Context" do
       defined?(Lego::Controller::Context).should eql("constant")
     end
+
+    it "should define Lego::ExtensionHandler" do
+      defined?(Lego::ExtensionHandler).should eql("constant")
+    end
   end
 end

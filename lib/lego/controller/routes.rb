@@ -21,10 +21,22 @@ class Lego::Controller::Routes
 
   def get(verb, path)
     matchers.each do |matcher|
-      if action = matcher.match_route(routes, verb, path)
-        return action
+      routes[verb].each do |route, action|
+        return {:matcher => matcher, :action => action} if matcher.match_route(route, path)
       end
     end
     false
+  end
+
+  def match(verb, path)
+    if match = get(verb, path)
+      yield match
+    else
+      [404, {'Content-Type' => 'text/html'}, '404 - Not found']
+    end
+  end
+
+  def load_global_matchers(parent)
+    (matchers << parent.routes.matchers).flatten!
   end
 end
