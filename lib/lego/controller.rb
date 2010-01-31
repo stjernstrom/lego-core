@@ -7,29 +7,10 @@ class Lego::Controller
 
   def self.inherited(subclass)
     subclass.inherit_constants(self)
-    subclass.load_globals(self)
+    subclass.load_global_options(self)
   end
-
-  def self.inherit_constants(parent)
-    self.const_set(:Context, Class.new(parent::Context))
-    self::Context.const_set(:CurrentClass, self)
-  end
-
-  def self.load_globals(parent)
-    self.routes.load_global_matchers(parent)
-    self.config.load_global_options(parent)
-    self.instance.extension_handler.load_global_middlewares(parent)
-  end
-  
+ 
   attr_reader :routes, :config
-
-  def context
-    self.class::Context
-  end
-
-  def extension_handler
-    @extension_handler ||= ::Lego::ExtensionHandler.new(self)
-  end
 
   def initialize
     @routes = Routes.new
@@ -62,9 +43,28 @@ class Lego::Controller
     extension_handler.middleware_chain_for(app).call(env)
   end
   
+  def context
+    self.class::Context
+  end
+
+  def extension_handler
+    @extension_handler ||= ::Lego::ExtensionHandler.new(self)
+  end
+
   private
 
     def extract_method_and_path(env)
       [env["REQUEST_METHOD"].downcase.to_sym, env["PATH_INFO"]]
+    end
+
+    def self.inherit_constants(parent)
+      self.const_set(:Context, Class.new(parent::Context))
+      self::Context.const_set(:CurrentClass, self)
+    end
+
+    def self.load_global_options(parent)
+      self.routes.load_global_matchers(parent)
+      self.config.load_global_options(parent)
+      self.instance.extension_handler.load_global_middlewares(parent)
     end
 end
