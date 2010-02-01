@@ -12,18 +12,6 @@ module BasicControllerExtension
     def get(path, &block)
       routes.add :get, path, &block
     end
-
-    def post(path, &block)
-      routes.add :get, path, &block
-    end
-
-    def put(path, &block)
-      routes.add :get, path, &block
-    end
-    
-    def delete(path, &block)
-      routes.add :get, path, &block
-    end
   end
 
   module BasicRouter
