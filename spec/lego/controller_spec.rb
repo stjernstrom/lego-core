@@ -44,8 +44,39 @@ describe "Lego::Controller" do
     end
   end
 
-  it "should respond to use" do
-    Lego::Controller.should respond_to(:use)
+  context ".use" do
+
+    context "route matcher plugin" do
+
+      it "should be registered with lego" do
+        Lego::Controller.use BasicRouter
+        Lego::Controller.routes.matchers.should eql([BasicRouter])
+      end
+    end
+
+    context "controller plugin" do
+
+      it "should be registered with lego" do
+        Lego::Controller.use BasicController
+        Lego::Controller.should respond_to(:get)
+      end
+    end
+
+    context "view plugin" do
+
+      it "should be registered with lego" do
+        Lego::Controller.use BasicView
+        Lego::Controller::Context.new.should respond_to(:greeting)
+      end
+    end
+
+    context "middleware" do
+
+      it "should be registered with lego" do
+        Lego::Controller.use BasicMiddleware
+        Lego::Controller.instance.extension_handler.middlewares.should eql([BasicMiddleware])
+      end
+    end
   end
 
   it "should respond to routes" do
@@ -83,5 +114,9 @@ describe "Lego::Controller" do
     it "should only have one instance" do
       @app1.instance.should eql(@app1.instance)
     end
+  end
+
+  after do
+    Lego::Controller.instance_variable_set(:@controller, nil)
   end
 end
