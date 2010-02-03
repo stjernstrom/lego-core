@@ -86,8 +86,13 @@ describe "Lego::Controller" do
     end
   end
 
-  it "should respond to config" do
-    Lego::Controller.should respond_to(:config)
+  context ".config" do
+
+    it "should return an instance of config" do
+      @config = Lego::Config.new
+      Lego::Config.should_receive(:new).and_return(@config)
+      Lego::Controller.config.should eql(@config)
+    end
   end
 
   it "should respond to set" do
