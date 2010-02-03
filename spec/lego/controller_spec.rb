@@ -82,7 +82,9 @@ describe "Lego::Controller" do
   context ".routes" do
 
     it "should return an instance of class routes" do
-      Lego::Controller.routes.class.should eql(Lego::Controller::Routes)
+      @controller = Lego::Controller::Routes.new
+      Lego::Controller::Routes.should_receive(:new).and_return(@controller)
+      Lego::Controller.routes.should eql(@controller)
     end
   end
 
