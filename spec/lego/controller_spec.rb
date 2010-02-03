@@ -1,8 +1,56 @@
 require File.join(Dir.pwd, 'spec', 'spec_helper')
 
 describe "Lego::Controller" do
-  it "should respond to call" do
-    Lego::Controller.should respond_to(:call)
+  before do
+    @env = {'REQUEST_METHOD'=>'GET','PATH_INFO'=>'/'}
+  end
+
+  context ".call" do
+    context "without matching route" do
+      it "should return a 404 status code" do
+        Lego::Controller.call(@env)[0].should eql(404)
+      end
+
+      it "should return a content type of text/html" do
+        Lego::Controller.call(@env)[1].should include('Content-Type'=>'text/html')
+      end
+
+      it "should return a body with 404 - Not found" do
+        Lego::Controller.call(@env)[2].should eql('404 - Not found')
+      end
+    end
+
+    context "with matching route" do
+      before do
+        matcher_plugin = Module.new do
+          def self.register(lego)
+            lego.register_plugin :router, self
+          end
+
+          def self.match_route(route, path)
+            route == path
+          end
+        end
+        Lego::Controller.use matcher_plugin
+        Lego::Controller.routes.add(:get, '/', &lambda { "hello from lego" })
+      end
+
+      it "should return a 200 status code" do
+        Lego::Controller.call(@env)[0].should eql(200)
+      end
+
+      it "should return a content type of text/html" do
+        Lego::Controller.call(@env)[1].should include('Content-Type'=>'text/html')
+      end
+
+      it "should return a content length of 15" do
+        Lego::Controller.call(@env)[1].should include('Content-Length'=>'15')
+      end
+
+      it "should return a body with hello from lego" do
+        Lego::Controller.call(@env)[2].body.should eql(['hello from lego'])
+      end
+    end
   end
 
   it "should respond to use" do
@@ -21,27 +69,10 @@ describe "Lego::Controller" do
     Lego::Controller.should respond_to(:set)
   end
 
-  describe "instance" do
-    it "should respond to call" do
-      Lego::Controller.instance.should respond_to(:call)
-    end
-
-    it "should respond to use" do
-      Lego::Controller.instance.should respond_to(:use)
-    end
-
-    it "should respond to routes" do
-      Lego::Controller.instance.should respond_to(:routes)
-    end
-
-    it "should respond to config" do
-      Lego::Controller.instance.should respond_to(:config)
-    end
-
-    it "should respond to set" do
-      Lego::Controller.instance.should respond_to(:set)
-    end
+  it "should respond to instance" do
+    Lego::Controller.should respond_to(:instance)
   end
+
 
   describe "subclass" do
 
