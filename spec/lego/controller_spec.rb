@@ -79,8 +79,11 @@ describe "Lego::Controller" do
     end
   end
 
-  it "should respond to routes" do
-    Lego::Controller.should respond_to(:routes)
+  context ".routes" do
+
+    it "should return an instance of class routes" do
+      Lego::Controller.routes.class.should eql(Lego::Controller::Routes)
+    end
   end
 
   it "should respond to config" do
