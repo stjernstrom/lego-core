@@ -12,3 +12,13 @@ def lego_app(superclass=Lego::Controller, &block)
     Class.new(superclass, &block)
   end
 end
+
+module BasicRouter
+  def self.register(lego)
+    lego.register_plugin :router, self
+  end
+
+  def self.match_route(route, path)
+    route == path
+  end
+end

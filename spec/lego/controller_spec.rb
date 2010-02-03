@@ -22,16 +22,7 @@ describe "Lego::Controller" do
 
     context "with matching route" do
       before do
-        matcher_plugin = Module.new do
-          def self.register(lego)
-            lego.register_plugin :router, self
-          end
-
-          def self.match_route(route, path)
-            route == path
-          end
-        end
-        Lego::Controller.use matcher_plugin
+        Lego::Controller.use BasicRouter # Defined in spec/spec_helper.rb
         Lego::Controller.routes.add(:get, '/', &lambda { "hello from lego" })
       end
 
