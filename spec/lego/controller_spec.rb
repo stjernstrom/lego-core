@@ -109,10 +109,6 @@ describe "Lego::Controller" do
       Lego::Controller.instance.should eql(@controller)
     end
   end
-  it "should respond to instance" do
-    Lego::Controller.should respond_to(:instance)
-  end
-
 
   describe "subclass" do
 
