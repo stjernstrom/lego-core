@@ -101,6 +101,14 @@ describe "Lego::Controller" do
     Lego::Controller.should respond_to(:set)
   end
 
+  context ".instance" do
+
+    it "should return an instance of it self" do
+      @controller = Lego::Controller.new
+      Lego::Controller.should_receive(:new).and_return(@controller)
+      Lego::Controller.instance.should eql(@controller)
+    end
+  end
   it "should respond to instance" do
     Lego::Controller.should respond_to(:instance)
   end
