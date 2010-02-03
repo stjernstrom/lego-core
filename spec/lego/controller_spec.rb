@@ -5,6 +5,15 @@ describe "Lego::Controller" do
     @env = {'REQUEST_METHOD'=>'GET','PATH_INFO'=>'/'}
   end
 
+  context ".routes" do
+
+    it "should return an instance of class routes" do
+      @controller = Lego::Controller::Routes.new
+      Lego::Controller::Routes.should_receive(:new).and_return(@controller)
+      Lego::Controller.routes.should eql(@controller)
+    end
+  end
+
   context ".call" do
     context "without matching route" do
       it "should return a 404 status code" do
@@ -76,15 +85,6 @@ describe "Lego::Controller" do
         Lego::Controller.use BasicMiddleware
         Lego::Controller.instance.extension_handler.middlewares.should eql([BasicMiddleware])
       end
-    end
-  end
-
-  context ".routes" do
-
-    it "should return an instance of class routes" do
-      @controller = Lego::Controller::Routes.new
-      Lego::Controller::Routes.should_receive(:new).and_return(@controller)
-      Lego::Controller.routes.should eql(@controller)
     end
   end
 
