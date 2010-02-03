@@ -106,6 +106,14 @@ describe "Lego::Controller" do
     end
   end
 
+  context ".set" do
+    
+    it "should insert values into config" do
+      Lego::Controller.set :foo => "bar"
+      Lego::Controller.config.config.should eql({"foo" => "bar"})
+    end
+  end
+
   it "should respond to set" do
     Lego::Controller.should respond_to(:set)
   end
